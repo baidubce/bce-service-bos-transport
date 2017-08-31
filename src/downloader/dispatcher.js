@@ -9,6 +9,7 @@ import path from 'path';
 import queue from 'async/queue';
 import isFunction from 'lodash.isfunction';
 
+import {debug} from '../logger';
 import Transport from './transport';
 import {
     NotifyStart, NotifyPaused,
@@ -41,13 +42,9 @@ export default class Dispatcher {
             done();
         });
 
-        if (transport.isPaused()) {
-            transport.resume();
-        } else {
-            transport.start();
-        }
-
         this._send(NotifyStart, {uuid: transport._uuid});
+
+        transport.resume();
     }
 
     _send(command, message = {}) {
@@ -58,6 +55,8 @@ export default class Dispatcher {
         if (isFunction(this[category])) {
             this[category](config);
         }
+
+        debug(`invoke ${category}, config = ${JSON.stringify(config)}`);
     }
 
     addItem(config = {}) {
@@ -87,6 +86,8 @@ export default class Dispatcher {
     pauseItem({uuid}) {
         if (uuid in this._transportCache) {
             this._transportCache[uuid].pause();
+        } else {
+            this._send(NotifyPaused, {uuid});
         }
     }
 
@@ -99,7 +100,9 @@ export default class Dispatcher {
 
     resumeItem({uuid}) {
         if (uuid in this._transportCache) {
-            this._queue.unshift(this._transportCache[uuid]);
+            if (this._transportCache[uuid].isPaused()) {
+                this._queue.unshift(this._transportCache[uuid]);
+            }
         }
     }
 }

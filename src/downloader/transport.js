@@ -28,6 +28,7 @@ export default class Transport extends EventEmitter {
         this._client = new BosClient(credentials);
 
         this._timeout = 10e3; // 10s
+        this._paused = true;
     }
 
     /**
@@ -58,7 +59,7 @@ export default class Transport extends EventEmitter {
         /**
          * 保证`WriteStream`一定可以被close掉
          */
-        const _checkAlive = debounce(() => outputStream.end(), this._timeout);
+        const _checkAlive = debounce(() => this.pause(), this._timeout);
 
         /**
          * 通知节流
@@ -145,12 +146,31 @@ export default class Transport extends EventEmitter {
         if (!isExist) {
             this.start();
         } else {
+            /**
+             * 没有办法比对本地与BOS上文件是否一致，只能检查文件大小了
+             */
             const size = fs.statSync(this._localPath).size;
-            this.start(size);
+
+            if (size > this._totalSize) {
+                /**
+                 * 文件不一致，重新下载
+                 */
+                this.start();
+            } else if (size < this._totalSize) {
+                /**
+                 * 文件续传
+                 */
+                this.start(size);
+            } else {
+                /**
+                 * 大小一致，认为完成了
+                 */
+                this.emit('finish', {uuid: this._uuid, objectKey: this._objectKey});
+            }
         }
     }
 
     isPaused() {
-        return !!this._paused;
+        return this._paused;
     }
 }

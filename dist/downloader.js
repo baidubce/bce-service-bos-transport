@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 28);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1653,7 +1653,7 @@ var EventEmitter = __webpack_require__(13).EventEmitter;
 var Q = __webpack_require__(4);
 var u = __webpack_require__(1);
 
-var config = __webpack_require__(53);
+var config = __webpack_require__(54);
 var Auth = __webpack_require__(10);
 var HttpClient = __webpack_require__(8);
 var H = __webpack_require__(7);
@@ -3839,9 +3839,9 @@ return Q;
  */
 
 if (typeof process !== 'undefined' && process.type === 'renderer') {
-  module.exports = __webpack_require__(45);
+  module.exports = __webpack_require__(46);
 } else {
-  module.exports = __webpack_require__(47);
+  module.exports = __webpack_require__(48);
 }
 
 
@@ -3943,8 +3943,8 @@ exports.ACCEPT = 'accept';
 /* eslint max-params:[0,10] */
 /* globals ArrayBuffer */
 
-var http = __webpack_require__(50);
-var https = __webpack_require__(51);
+var http = __webpack_require__(51);
+var https = __webpack_require__(52);
 var util = __webpack_require__(0);
 var stream = __webpack_require__(17);
 var EventEmitter = __webpack_require__(13).EventEmitter;
@@ -4006,7 +4006,7 @@ HttpClient.prototype.sendRequest = function (httpMethod, path, body, headers, pa
         defaultHeaders[H.USER_AGENT] = navigator.userAgent;
     }
     else {
-        defaultHeaders[H.USER_AGENT] = util.format('bce-sdk-nodejs/%s/%s/%s', __webpack_require__(52).version,
+        defaultHeaders[H.USER_AGENT] = util.format('bce-sdk-nodejs/%s/%s/%s', __webpack_require__(53).version,
             process.platform, process.version);
     }
     defaultHeaders[H.X_BCE_DATE] = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
@@ -4358,7 +4358,7 @@ module.exports = HttpClient;
 var fs = __webpack_require__(3);
 var stream = __webpack_require__(17);
 
-var async = __webpack_require__(67);
+var async = __webpack_require__(68);
 var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 var debug = __webpack_require__(5)('bce-sdk:helper');
@@ -4596,7 +4596,7 @@ var u = __webpack_require__(1);
 var debug = __webpack_require__(5)('bce-sdk:auth');
 
 var H = __webpack_require__(7);
-var strings = __webpack_require__(25);
+var strings = __webpack_require__(26);
 
 /**
  * Auth
@@ -4876,14 +4876,14 @@ var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 
 var H = __webpack_require__(7);
-var strings = __webpack_require__(25);
+var strings = __webpack_require__(26);
 var Auth = __webpack_require__(10);
 var crypto = __webpack_require__(11);
 var HttpClient = __webpack_require__(8);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
-var WMStream = __webpack_require__(54);
-var Multipart = __webpack_require__(55);
+var WMStream = __webpack_require__(55);
+var Multipart = __webpack_require__(56);
 
 // var MIN_PART_SIZE = 1048576;                // 1M
 // var THREAD = 2;
@@ -7022,7 +7022,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.isAsync = undefined;
 
-var _asyncify = __webpack_require__(39);
+var _asyncify = __webpack_require__(40);
 
 var _asyncify2 = _interopRequireDefault(_asyncify);
 
@@ -7045,6 +7045,32 @@ exports.isAsync = isAsync;
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * azeroth - 日志记录器
+ *
+ * @file logger.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+function logger(type, message) {
+  process.send({ category: 'log', message: { type, message } });
+}
+
+const debug = exports.debug = msg => logger('debug', msg);
+const info = exports.info = msg => logger('info', msg);
+const warn = exports.warn = msg => logger('warn', msg);
+const error = exports.error = msg => logger('error', msg);
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -7058,7 +7084,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(46);
+exports.humanize = __webpack_require__(47);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -7250,7 +7276,7 @@ function coerce(val) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 /**
@@ -7297,7 +7323,7 @@ exports.trim = function (string) {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -7374,7 +7400,7 @@ module.exports = Statistic;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7384,30 +7410,30 @@ var _lodash = __webpack_require__(20);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _dispatcher2 = __webpack_require__(28);
+var _dispatcher2 = __webpack_require__(29);
 
 var _dispatcher3 = _interopRequireDefault(_dispatcher2);
+
+var _logger = __webpack_require__(24);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // 不能作为独立进程运行
-/**
- * 文件下载模块
- *
- * @file src/downloader/Transport.js
- * @author 523317421@qq.com
- */
-
 if (!(0, _lodash2.default)(process.send)) {
     process.exit();
 } else {
-    process.send('start downloader transport');
-}
+    (0, _logger.info)(`start downloader transport pid = ${process.pid}`);
+} /**
+   * 文件下载模块
+   *
+   * @file src/downloader/Transport.js
+   * @author 523317421@qq.com
+   */
 
 const { BCE_AK, BCE_SK, BCE_BOS_ENDPOINT } = process.env;
 
 if (!BCE_AK || !BCE_SK || !BCE_BOS_ENDPOINT) {
-    process.send('Not found `BCE_AK`,`BCE_SK`, `BCE_BOS_ENDPOINT` env.');
+    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK`, `BCE_BOS_ENDPOINT` env.');
     process.exit();
 }
 
@@ -7419,7 +7445,7 @@ const _dispatcher = new _dispatcher3.default({
 process.on('message', msg => _dispatcher.dispatch(msg));
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7433,7 +7459,7 @@ var _path = __webpack_require__(6);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _queue = __webpack_require__(29);
+var _queue = __webpack_require__(30);
 
 var _queue2 = _interopRequireDefault(_queue);
 
@@ -7441,13 +7467,22 @@ var _lodash = __webpack_require__(20);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _transport = __webpack_require__(42);
+var _logger = __webpack_require__(24);
+
+var _transport = __webpack_require__(43);
 
 var _transport2 = _interopRequireDefault(_transport);
 
 var _command = __webpack_require__(19);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * 文件下载模块
+ *
+ * @file src/downloader/dispatcher.js
+ * @author 523317421@qq.com
+ */
 
 class Dispatcher {
     constructor(credentials) {
@@ -7475,13 +7510,9 @@ class Dispatcher {
             done();
         });
 
-        if (transport.isPaused()) {
-            transport.resume();
-        } else {
-            transport.start();
-        }
-
         this._send(_command.NotifyStart, { uuid: transport._uuid });
+
+        transport.resume();
     }
 
     _send(command, message = {}) {
@@ -7492,6 +7523,8 @@ class Dispatcher {
         if ((0, _lodash2.default)(this[category])) {
             this[category](config);
         }
+
+        (0, _logger.debug)(`invoke ${category}, config = ${JSON.stringify(config)}`);
     }
 
     addItem(config = {}) {
@@ -7519,6 +7552,8 @@ class Dispatcher {
     pauseItem({ uuid }) {
         if (uuid in this._transportCache) {
             this._transportCache[uuid].pause();
+        } else {
+            this._send(_command.NotifyPaused, { uuid });
         }
     }
 
@@ -7531,19 +7566,16 @@ class Dispatcher {
 
     resumeItem({ uuid }) {
         if (uuid in this._transportCache) {
-            this._queue.unshift(this._transportCache[uuid]);
+            if (this._transportCache[uuid].isPaused()) {
+                this._queue.unshift(this._transportCache[uuid]);
+            }
         }
     }
 }
-exports.default = Dispatcher; /**
-                               * 文件下载模块
-                               *
-                               * @file src/downloader/dispatcher.js
-                               * @author 523317421@qq.com
-                               */
+exports.default = Dispatcher;
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7560,7 +7592,7 @@ exports.default = function (worker, concurrency) {
   }, concurrency, 1);
 };
 
-var _queue = __webpack_require__(30);
+var _queue = __webpack_require__(31);
 
 var _queue2 = _interopRequireDefault(_queue);
 
@@ -7679,7 +7711,7 @@ module.exports = exports['default'];
  */
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7690,19 +7722,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = queue;
 
-var _baseIndexOf = __webpack_require__(31);
+var _baseIndexOf = __webpack_require__(32);
 
 var _baseIndexOf2 = _interopRequireDefault(_baseIndexOf);
 
-var _isArray = __webpack_require__(35);
+var _isArray = __webpack_require__(36);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
-var _noop = __webpack_require__(36);
+var _noop = __webpack_require__(37);
 
 var _noop2 = _interopRequireDefault(_noop);
 
-var _onlyOnce = __webpack_require__(37);
+var _onlyOnce = __webpack_require__(38);
 
 var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
 
@@ -7710,7 +7742,7 @@ var _setImmediate = __webpack_require__(21);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
-var _DoublyLinkedList = __webpack_require__(38);
+var _DoublyLinkedList = __webpack_require__(39);
 
 var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
 
@@ -7879,12 +7911,12 @@ function queue(worker, concurrency, payload) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseFindIndex = __webpack_require__(32),
-    baseIsNaN = __webpack_require__(33),
-    strictIndexOf = __webpack_require__(34);
+var baseFindIndex = __webpack_require__(33),
+    baseIsNaN = __webpack_require__(34),
+    strictIndexOf = __webpack_require__(35);
 
 /**
  * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
@@ -7905,7 +7937,7 @@ module.exports = baseIndexOf;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports) {
 
 /**
@@ -7935,7 +7967,7 @@ module.exports = baseFindIndex;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports) {
 
 /**
@@ -7953,7 +7985,7 @@ module.exports = baseIsNaN;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports) {
 
 /**
@@ -7982,7 +8014,7 @@ module.exports = strictIndexOf;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports) {
 
 /**
@@ -8014,7 +8046,7 @@ module.exports = isArray;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports) {
 
 /**
@@ -8037,7 +8069,7 @@ module.exports = noop;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8058,7 +8090,7 @@ function onlyOnce(fn) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8152,7 +8184,7 @@ DLL.prototype.remove = function (testFn) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8163,11 +8195,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = asyncify;
 
-var _isObject = __webpack_require__(40);
+var _isObject = __webpack_require__(41);
 
 var _isObject2 = _interopRequireDefault(_isObject);
 
-var _initialParams = __webpack_require__(41);
+var _initialParams = __webpack_require__(42);
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
@@ -8268,7 +8300,7 @@ function rethrow(error) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports) {
 
 /**
@@ -8305,7 +8337,7 @@ module.exports = isObject;
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8332,7 +8364,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 module.exports = exports['default'];
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8354,19 +8386,19 @@ var _util = __webpack_require__(0);
 
 var _util2 = _interopRequireDefault(_util);
 
-var _mkdirp = __webpack_require__(43);
+var _mkdirp = __webpack_require__(44);
 
 var _mkdirp2 = _interopRequireDefault(_mkdirp);
 
 var _events = __webpack_require__(13);
 
-var _bceSdkJs = __webpack_require__(44);
+var _bceSdkJs = __webpack_require__(45);
 
-var _lodash = __webpack_require__(74);
+var _lodash = __webpack_require__(75);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _lodash3 = __webpack_require__(75);
+var _lodash3 = __webpack_require__(76);
 
 var _lodash4 = _interopRequireDefault(_lodash3);
 
@@ -8393,6 +8425,7 @@ class Transport extends _events.EventEmitter {
         this._client = new _bceSdkJs.BosClient(credentials);
 
         this._timeout = 10e3; // 10s
+        this._paused = true;
     }
 
     /**
@@ -8423,7 +8456,7 @@ class Transport extends _events.EventEmitter {
         /**
          * 保证`WriteStream`一定可以被close掉
          */
-        const _checkAlive = (0, _lodash2.default)(() => outputStream.end(), this._timeout);
+        const _checkAlive = (0, _lodash2.default)(() => this.pause(), this._timeout);
 
         /**
          * 通知节流
@@ -8504,19 +8537,38 @@ class Transport extends _events.EventEmitter {
         if (!isExist) {
             this.start();
         } else {
+            /**
+             * 没有办法比对本地与BOS上文件是否一致，只能检查文件大小了
+             */
             const size = _fs2.default.statSync(this._localPath).size;
-            this.start(size);
+
+            if (size > this._totalSize) {
+                /**
+                 * 文件不一致，重新下载
+                 */
+                this.start();
+            } else if (size < this._totalSize) {
+                /**
+                 * 文件续传
+                 */
+                this.start(size);
+            } else {
+                /**
+                 * 大小一致，认为完成了
+                 */
+                this.emit('finish', { uuid: this._uuid, objectKey: this._objectKey });
+            }
         }
     }
 
     isPaused() {
-        return !!this._paused;
+        return this._paused;
     }
 }
 exports.default = Transport;
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var path = __webpack_require__(6);
@@ -8620,7 +8672,7 @@ mkdirP.sync = function sync (p, opts, made) {
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -8642,20 +8694,20 @@ mkdirP.sync = function sync (p, opts, made) {
 exports.Q = __webpack_require__(4);
 exports.Auth = __webpack_require__(10);
 exports.BosClient = __webpack_require__(15);
-exports.BcsClient = __webpack_require__(56);
-exports.BccClient = __webpack_require__(57);
-exports.SesClient = __webpack_require__(58);
-exports.QnsClient = __webpack_require__(59);
-exports.LssClient = __webpack_require__(60);
-exports.MctClient = __webpack_require__(61);
-exports.FaceClient = __webpack_require__(62);
-exports.OCRClient = __webpack_require__(63);
-exports.MediaClient = __webpack_require__(64);
+exports.BcsClient = __webpack_require__(57);
+exports.BccClient = __webpack_require__(58);
+exports.SesClient = __webpack_require__(59);
+exports.QnsClient = __webpack_require__(60);
+exports.LssClient = __webpack_require__(61);
+exports.MctClient = __webpack_require__(62);
+exports.FaceClient = __webpack_require__(63);
+exports.OCRClient = __webpack_require__(64);
+exports.MediaClient = __webpack_require__(65);
 exports.HttpClient = __webpack_require__(8);
 exports.MimeType = __webpack_require__(18);
-exports.STS = __webpack_require__(65);
-exports.VodClient = __webpack_require__(66);
-exports.DocClient = __webpack_require__(73);
+exports.STS = __webpack_require__(66);
+exports.VodClient = __webpack_require__(67);
+exports.DocClient = __webpack_require__(74);
 
 
 
@@ -8669,7 +8721,7 @@ exports.DocClient = __webpack_require__(73);
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -8678,7 +8730,7 @@ exports.DocClient = __webpack_require__(73);
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(24);
+exports = module.exports = __webpack_require__(25);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -8860,7 +8912,7 @@ function localstorage() {
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports) {
 
 /**
@@ -9018,14 +9070,14 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var tty = __webpack_require__(48);
+var tty = __webpack_require__(49);
 var util = __webpack_require__(0);
 
 /**
@@ -9034,7 +9086,7 @@ var util = __webpack_require__(0);
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(24);
+exports = module.exports = __webpack_require__(25);
 exports.init = init;
 exports.log = log;
 exports.formatArgs = formatArgs;
@@ -9211,7 +9263,7 @@ function createWritableStdioStream (fd) {
 
     case 'PIPE':
     case 'TCP':
-      var net = __webpack_require__(49);
+      var net = __webpack_require__(50);
       stream = new net.Socket({
         fd: fd,
         readable: false,
@@ -9270,37 +9322,37 @@ exports.enable(load());
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports) {
 
 module.exports = require("tty");
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = require("https");
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = {"_from":"bce-sdk-js@^0.2.7","_id":"bce-sdk-js@0.2.7","_inBundle":false,"_integrity":"sha1-mICM4DH9iCkDihx8IK0xfAKk+PM=","_location":"/bce-sdk-js","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"bce-sdk-js@^0.2.7","name":"bce-sdk-js","escapedName":"bce-sdk-js","rawSpec":"^0.2.7","saveSpec":null,"fetchSpec":"^0.2.7"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/bce-sdk-js/-/bce-sdk-js-0.2.7.tgz","_shasum":"98808ce031fd8829038a1c7c20ad317c02a4f8f3","_spec":"bce-sdk-js@^0.2.7","_where":"/Users/mudio/Desktop/client/bce-service-bos-transport","author":{"name":"leeight@gmail.com"},"bugs":{"url":"https://github.com/baidubce/bce-sdk-js/issues"},"bundleDependencies":false,"dependencies":{"async":"^1.5.2","debug":"^2.2.0","q":"^1.1.2","underscore":"^1.7.0"},"deprecated":false,"description":"Baidu Cloud Engine JavaScript SDK","devDependencies":{"browserify":"10.2.6","coveralls":"^2.11.8","expect.js":"^0.3.1","istanbul":"^0.4.2","mocha":"^2.4.5"},"directories":{"test":"test"},"homepage":"https://github.com/baidubce/bce-sdk-js#readme","license":"MIT","main":"index.js","name":"bce-sdk-js","repository":{"type":"git","url":"git+https://github.com/baidubce/bce-sdk-js.git"},"scripts":{"fecs":"fecs src","pack":"browserify -s baidubce.sdk index.js -o baidubce-sdk.bundle.js && uglifyjs baidubce-sdk.bundle.js --compress --mangle -o baidubce-sdk.bundle.min.js","test":"./test/run-all.sh"},"version":"0.2.7"}
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports) {
 
 /**
@@ -9340,7 +9392,7 @@ exports.DEFAULT_CONFIG = {
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9389,7 +9441,7 @@ module.exports = WMStream;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9478,7 +9530,7 @@ module.exports = Multipart;
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9833,7 +9885,7 @@ module.exports = BcsClient;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10059,7 +10111,7 @@ module.exports = BccClient;
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10233,7 +10285,7 @@ module.exports = SesClient;
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10526,7 +10578,7 @@ exports.Subscription = Subscription;
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10816,7 +10868,7 @@ exports.Notification = Notification;
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11291,7 +11343,7 @@ exports.Preset = Preset;
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11520,7 +11572,7 @@ module.exports = FaceClient;
 
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11616,7 +11668,7 @@ module.exports = OCRClient;
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11856,7 +11908,7 @@ module.exports = MediaClient;
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11932,7 +11984,7 @@ module.exports = STS;
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11962,12 +12014,12 @@ var url = __webpack_require__(12);
 var BceBaseClient = __webpack_require__(2);
 var BosClient = __webpack_require__(15);
 var helper = __webpack_require__(9);
-var Media = __webpack_require__(68);
-var Notification = __webpack_require__(69);
-var Player = __webpack_require__(70);
-var PresetGroup = __webpack_require__(71);
-var Statistic = __webpack_require__(26);
-var StrategyGroup = __webpack_require__(72);
+var Media = __webpack_require__(69);
+var Notification = __webpack_require__(70);
+var Player = __webpack_require__(71);
+var PresetGroup = __webpack_require__(72);
+var Statistic = __webpack_require__(27);
+var StrategyGroup = __webpack_require__(73);
 
 /**
  * VOD音视频点播服务
@@ -12071,7 +12123,7 @@ module.exports = VodClient;
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -13343,7 +13395,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13363,7 +13415,7 @@ var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
 var helper = __webpack_require__(9);
-var Statistic = __webpack_require__(26);
+var Statistic = __webpack_require__(27);
 
 /**
  * 音视频媒资接口
@@ -13611,7 +13663,7 @@ module.exports = Media;
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13715,7 +13767,7 @@ module.exports = Notification;
 
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13828,7 +13880,7 @@ module.exports = Player;
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13942,7 +13994,7 @@ module.exports = PresetGroup;
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -14030,7 +14082,7 @@ module.exports = StrategyGroup;
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -14444,7 +14496,7 @@ exports.Notification = Notification;
 
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports) {
 
 /**
@@ -14827,7 +14879,7 @@ module.exports = debounce;
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports) {
 
 /**

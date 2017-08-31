@@ -5,20 +5,27 @@
  * @author 523317421@qq.com
  */
 
-import _ from 'lodash';
+import isFunction from 'lodash.isfunction';
+
 import Dispatcher from './dispatcher';
 
 // 不能作为独立进程运行
-if (!_.isFunction(process.send)) {
-    process.exit(0);
+if (!isFunction(process.send)) {
+    process.exit();
 } else {
     process.send('start downloader transport');
 }
 
-const ak = process.env.BCE_AK || 'fdd8f61810764eed9bcd6cc1e2296006';
-const sk = process.env.BCE_SK || '479e1f33e5514dd3981fedb8ee9f67e4';
-const endpoint = process.env.BCE_BOS_ENDPOINT || 'http://bos.qasandbox.bcetest.baidu.com';
+const {BCE_AK, BCE_SK, BCE_BOS_ENDPOINT} = process.env;
 
-const _dispatcher = new Dispatcher({endpoint, credentials: {ak, sk}});
+if (!BCE_AK || !BCE_SK || !BCE_BOS_ENDPOINT) {
+    process.send('Not found `BCE_AK`,`BCE_SK`, `BCE_BOS_ENDPOINT` env.');
+    process.exit();
+}
+
+const _dispatcher = new Dispatcher({
+    endpoint: BCE_BOS_ENDPOINT,
+    credentials: {ak: BCE_AK, sk: BCE_SK},
+});
 
 process.on('message', msg => _dispatcher.dispatch(msg));

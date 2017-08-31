@@ -61,12 +61,12 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 61);
+/******/ 	return __webpack_require__(__webpack_require__.s = 77);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 20:
+/***/ 19:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -90,7 +90,7 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 
 /***/ }),
 
-/***/ 61:
+/***/ 77:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -99,20 +99,20 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.aownloadNotify = exports.DownloadNotify = undefined;
+exports.aownloadNotify = exports.DownloadCommand = undefined;
 
-var _command = __webpack_require__(20);
+var _command = __webpack_require__(19);
 
 var downloadCmd = _interopRequireWildcard(_command);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-const DownloadNotify = exports.DownloadNotify = downloadCmd; /**
-                                                              * 入口程序
-                                                              *
-                                                              * @file src/downloader/dispatcher.js
-                                                              * @author 523317421@qq.com
-                                                              */
+const DownloadCommand = exports.DownloadCommand = downloadCmd; /**
+                                                                * 入口程序
+                                                                *
+                                                                * @file src/downloader/dispatcher.js
+                                                                * @author 523317421@qq.com
+                                                                */
 
 const aownloadNotify = exports.aownloadNotify = downloadCmd;
 

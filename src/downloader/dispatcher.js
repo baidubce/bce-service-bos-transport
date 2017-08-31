@@ -5,9 +5,9 @@
  * @author 523317421@qq.com
  */
 
-import _ from 'lodash';
 import path from 'path';
-import async from 'async';
+import queue from 'async/queue';
+import isFunction from 'lodash.isfunction';
 
 import Transport from './transport';
 import {
@@ -20,7 +20,7 @@ export default class Dispatcher {
         this._credentials = credentials;
         this._transportCache = {};
         // 运行队列
-        this._queue = async.queue((...args) => this._invoke(...args), 5);
+        this._queue = queue((...args) => this._invoke(...args), 5);
     }
 
     _invoke(transport, done) {
@@ -55,7 +55,7 @@ export default class Dispatcher {
     }
 
     dispatch({category, config}) {
-        if (_.isFunction(this[category])) {
+        if (isFunction(this[category])) {
             this[category](config);
         }
     }

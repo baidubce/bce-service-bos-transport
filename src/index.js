@@ -7,6 +7,6 @@
 
 import * as downloadCmd from './downloader/command';
 
-export const DownloadNotify = downloadCmd;
+export const DownloadCommand = downloadCmd;
 export const aownloadNotify = downloadCmd;
 

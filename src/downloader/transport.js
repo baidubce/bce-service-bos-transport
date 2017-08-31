@@ -6,12 +6,13 @@
  */
 
 import fs from 'fs';
-import _ from 'lodash';
 import path from 'path';
 import util from 'util';
 import mkdirp from 'mkdirp';
 import {EventEmitter} from 'events';
 import {BosClient} from 'bce-sdk-js';
+import debounce from 'lodash.debounce';
+import throttle from 'lodash.throttle';
 
 export default class Transport extends EventEmitter {
     constructor(config) {
@@ -34,7 +35,7 @@ export default class Transport extends EventEmitter {
      *
      * @memberof Transport
      */
-    start(range) {
+    start(start = 0) {
         /**
          * 重置状态
          */
@@ -51,19 +52,24 @@ export default class Transport extends EventEmitter {
         /**
          * 如果指定了范围，那么使用文件追加
          */
-        this._outputStream = fs.createWriteStream(this._localPath, {flags: range ? 'a' : 'w'});
+        this._outputStream = fs.createWriteStream(this._localPath, {flags: start ? 'a' : 'w'});
         const outputStream = this._outputStream;
 
         /**
          * 保证`WriteStream`一定可以被close掉
          */
-        const _checkAlive = _.debounce(() => outputStream.end(), this._timeout);
+        const _checkAlive = debounce(() => outputStream.end(), this._timeout);
 
         /**
          * 通知节流
          */
-        const _notifyRate = _.throttle(
-            rate => this.emit('rate', {uuid: this._uuid, objectKey: this._objectKey, rate}),
+        const _notifyRate = throttle(
+            (rate, bytesWritten) => this.emit('rate', {
+                uuid: this._uuid,
+                objectKey: this._objectKey,
+                rate,
+                bytesWritten,
+            }),
             500,
         );
 
@@ -75,7 +81,7 @@ export default class Transport extends EventEmitter {
             const rangeTime = Date.now() - startDate;
             const rate = outputStream.bytesWritten / rangeTime; // kb/s
 
-            _notifyRate(rate);
+            _notifyRate(rate, outputStream.bytesWritten + start);
 
             _checkAlive();
         });
@@ -88,7 +94,7 @@ export default class Transport extends EventEmitter {
             key: this._objectKey,
             outputStream,
             headers: {
-                Range: range ? util.format('bytes=%s', range) : '',
+                Range: start ? util.format('bytes=%s-%s', start, this._totalSize) : '',
             },
         }).then(
             () => {
@@ -140,7 +146,7 @@ export default class Transport extends EventEmitter {
             this.start();
         } else {
             const size = fs.statSync(this._localPath).size;
-            this.start(`${size}-${this._totalSize}`);
+            this.start(size);
         }
     }
 

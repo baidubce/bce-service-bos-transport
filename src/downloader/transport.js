@@ -18,13 +18,12 @@ export default class Transport extends EventEmitter {
     constructor(config) {
         super();
 
-        const {uuid, bucketName, objectKey, localPath, totalSize, credentials} = config;
+        const {uuid, bucketName, objectKey, localPath, credentials} = config;
 
         this._uuid = uuid;
         this._objectKey = objectKey;
         this._localPath = localPath;
         this._bucketName = bucketName;
-        this._totalSize = totalSize;
         this._client = new BosClient(credentials);
 
         this._timeout = 10e3; // 10s
@@ -32,28 +31,60 @@ export default class Transport extends EventEmitter {
     }
 
     /**
+     * 获取Meta数据
+     *
+     * @param {string} bucketName
+     * @param {string} key
+     * @returns {Promise}
+     * @memberof Transport
+     */
+    _fetchMetadata(bucketName, key) {
+        return this._client.getObjectMetadata(bucketName, key);
+    }
+
+    /**
+     * 检查任务是否完成
+     *
+     * @returns
+     * @memberof Transport
+     */
+    _checkFinish() {
+        if (this._paused) {
+            return this.emit('pause', {uuid: this._uuid});
+        }
+
+        this._paused = true;
+
+        this.emit('finish', {uuid: this._uuid, objectKey: this._objectKey});
+    }
+
+    /**
+     * 处理错误
+     *
+     * @param {Error} err
+     * @returns
+     * @memberof Transport
+     */
+    _checkError(err) {
+        if (this._paused) {
+            return this.emit('pause', {uuid: this._uuid});
+        }
+
+        this._paused = true;
+
+        this.emit('error', {uuid: this._uuid, error: err.message});
+    }
+
+    /**
      * 重新下载文件
      *
      * @memberof Transport
      */
-    start(start = 0) {
-        /**
-         * 重置状态
-         */
-        this._paused = false;
-
-        /**
-         * 目录不存在则创建
-         */
-        const isExist = fs.existsSync(this._localPath);
-        if (!isExist) {
-            mkdirp.sync(path.dirname(this._localPath));
-        }
-
+    resume(begin = 0, end = 0) {
         /**
          * 如果指定了范围，那么使用文件追加
          */
-        this._outputStream = fs.createWriteStream(this._localPath, {flags: start ? 'a' : 'w'});
+        this._outputStream = fs.createWriteStream(this._localPath, {flags: begin ? 'a' : 'w'});
         const outputStream = this._outputStream;
 
         /**
@@ -82,7 +113,7 @@ export default class Transport extends EventEmitter {
             const rangeTime = Date.now() - startDate;
             const rate = outputStream.bytesWritten / rangeTime; // kb/s
 
-            _notifyRate(rate, outputStream.bytesWritten + start);
+            _notifyRate(rate, outputStream.bytesWritten + begin);
 
             _checkAlive();
         });
@@ -95,26 +126,11 @@ export default class Transport extends EventEmitter {
             key: this._objectKey,
             outputStream,
             headers: {
-                Range: start ? util.format('bytes=%s-%s', start, this._totalSize) : '',
+                Range: begin ? util.format('bytes=%s-%s', begin, end) : '',
             },
         }).then(
-            () => {
-                if (this._paused) {
-                    return this.emit('pause', {uuid: this._uuid});
-                }
-
-                this.emit('finish', {uuid: this._uuid, objectKey: this._objectKey});
-            },
-            (err) => {
-                /**
-                 * 暂停后，有可能报错`wirte after end`
-                 */
-                if (this._paused) {
-                    return this.emit('pause', {uuid: this._uuid});
-                }
-
-                this.emit('error', {uuid: this._uuid, error: err});
-            },
+            () => this._checkFinish(),
+            err => this._checkError(err),
         );
     }
 
@@ -138,36 +154,56 @@ export default class Transport extends EventEmitter {
      *
      * @memberof Transport
      */
-    resume() {
+    start() {
+        /**
+         * 重置状态
+         */
+        this._paused = false;
+
         /**
          * 文件不存在则重新开始
          */
         const isExist = fs.existsSync(this._localPath);
         if (!isExist) {
-            this.start();
-        } else {
             /**
-             * 没有办法比对本地与BOS上文件是否一致，只能检查文件大小了
+             * 目录不存在则创建
              */
-            const size = fs.statSync(this._localPath).size;
+            try {
+                mkdirp.sync(path.dirname(this._localPath));
+                this.resume();
+            } catch (ex) {
+                this._checkError(ex);
+            }
+            return;
+        }
 
-            if (size > this._totalSize) {
-                /**
-                 * 文件不一致，重新下载
-                 */
-                this.start();
-            } else if (size < this._totalSize) {
-                /**
-                 * 文件续传
-                 */
-                this.start(size);
-            } else {
+        /**
+         * 没有办法比对本地与BOS上文件是否一致，只能检查文件大小了
+         */
+        const begin = fs.statSync(this._localPath).size;
+        this._fetchMetadata(this._bucketName, this._objectKey).then(
+            ({http_headers}) => {
+                const totalSize = http_headers['content-length'];
+
+                if (begin > totalSize) {
+                    /**
+                     * 文件不一致，重新下载
+                     */
+                    return this.resume();
+                } else if (begin < totalSize) {
+                    /**
+                     * 文件续传
+                     */
+                    return this.resume(begin, totalSize);
+                }
+
                 /**
                  * 大小一致，认为完成了
                  */
-                this.emit('finish', {uuid: this._uuid, objectKey: this._objectKey});
-            }
-        }
+                return this._checkFinish();
+            },
+            err => this._checkError(err),
+        );
     }
 
     isPaused() {

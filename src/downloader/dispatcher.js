@@ -44,7 +44,7 @@ export default class Dispatcher {
 
         this._send(NotifyStart, {uuid: transport._uuid});
 
-        transport.resume();
+        transport.start();
     }
 
     _send(command, message = {}) {

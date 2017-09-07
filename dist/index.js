@@ -61,12 +61,12 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 78);
+/******/ 	return __webpack_require__(__webpack_require__.s = 83);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 19:
+/***/ 72:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -79,10 +79,10 @@ Object.defineProperty(exports, "__esModule", {
  * 文件下载通知命令
  *
  * @file src/downloader/dispatcher.js
- * @author 523317421@qq.com
+ * @author mudio(job.zhanghao@gmail.com)
  */
 
-const NotifyRate = exports.NotifyRate = 'download_notify_rate';
+const NotifyProgress = exports.NotifyProgress = 'download_notify_progress';
 const NotifyPaused = exports.NotifyPaused = 'download_notify_pause';
 const NotifyFinished = exports.NotifyFinished = 'download_notify_finish';
 const NotifyError = exports.NotifyError = 'download_notify_error';
@@ -90,7 +90,7 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 
 /***/ }),
 
-/***/ 78:
+/***/ 73:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -99,22 +99,51 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.aownloadNotify = exports.DownloadCommand = undefined;
+/**
+ * 文件下载通知命令
+ *
+ * @file src/uploader/dispatcher.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
 
-var _command = __webpack_require__(19);
+const NotifyPaused = exports.NotifyPaused = 'upload_notify_pause';
+const NotifyFinished = exports.NotifyFinished = 'upload_notify_finish';
+const NotifyError = exports.NotifyError = 'upload_notify_error';
+const NotifyStart = exports.NotifyStart = 'upload_notify_start';
+const NotifyProgress = exports.NotifyProgress = 'upload_notify_progress';
 
-var downloadCmd = _interopRequireWildcard(_command);
+/***/ }),
+
+/***/ 83:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DownloadCommand = exports.UploadCommand = undefined;
+
+var _command = __webpack_require__(73);
+
+var uploadCmd = _interopRequireWildcard(_command);
+
+var _command2 = __webpack_require__(72);
+
+var downloadCmd = _interopRequireWildcard(_command2);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-const DownloadCommand = exports.DownloadCommand = downloadCmd; /**
-                                                                * 入口程序
-                                                                *
-                                                                * @file src/downloader/dispatcher.js
-                                                                * @author 523317421@qq.com
-                                                                */
+/**
+ * 入口程序
+ *
+ * @file src/index.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
 
-const aownloadNotify = exports.aownloadNotify = downloadCmd;
+const UploadCommand = exports.UploadCommand = uploadCmd;
+const DownloadCommand = exports.DownloadCommand = downloadCmd;
 
 /***/ })
 

@@ -2,7 +2,7 @@
  * 文件下载模块
  *
  * @file src/downloader/Transport.js
- * @author 523317421@qq.com
+ * @author mudio(job.zhanghao@gmail.com)
  */
 
 import isFunction from 'lodash.isfunction';

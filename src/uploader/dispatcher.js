@@ -1,16 +1,18 @@
 /**
  * 文件下载模块
  *
- * @file src/downloader/dispatcher.js
+ * @file src/uploader/dispatcher.js
  * @author mudio(job.zhanghao@gmail.com)
  */
 
-import path from 'path';
+import fs from 'fs';
 import queue from 'async/queue';
 import isFunction from 'lodash.isfunction';
 
 import {debug} from '../logger';
 import Transport from './transport';
+import MultiTransport from './multi_transport';
+
 import {
     NotifyStart, NotifyPaused,
     NotifyFinished, NotifyError, NotifyProgress,
@@ -24,25 +26,58 @@ export default class Dispatcher {
         this._queue = queue((...args) => this._invoke(...args), 5);
     }
 
+    /**
+     * 属性检查
+     *
+     *  - uuid
+     *  - bucketName
+     *  - objectKey
+     *  - localPath
+     *  - uploadId (option)
+     *
+     * @param {Object} [command={}]
+     * @memberof Dispatcher
+     */
+    _checkProps(command = {}) {
+        if (process.env.DEBUG) {
+            const {uuid, bucketName, objectKey, localPath} = command;
+
+            if (!uuid) {
+                throw new TypeError('`uuid` should not be empty');
+            }
+            if (!bucketName) {
+                throw new TypeError('`bucketName` should not be empty');
+            }
+            if (!objectKey) {
+                throw new TypeError('`objectKey` should not be empty');
+            }
+            if (!localPath) {
+                throw new TypeError('`localPath` should not be empty');
+            }
+        }
+    }
+
     _invoke(transport, done) {
-        transport.on('rate', msg => this._send(NotifyProgress, msg));
+        transport.on('start', msg => this._send(NotifyStart, msg));
 
         transport.on('pause', (msg) => {
             this._send(NotifyPaused, msg);
             done();
         });
+
+        transport.on('progress', msg => this._send(NotifyProgress, msg));
+
         transport.on('finish', (msg) => {
             this._send(NotifyFinished, msg);
             // 如果已经完成的任务，则清理掉资源
             delete this._transportCache[msg.uuid];
             done();
         });
+
         transport.on('error', (msg) => {
             this._send(NotifyError, msg);
             done();
         });
-
-        this._send(NotifyStart, {uuid: transport._uuid});
 
         transport.start();
     }
@@ -52,6 +87,8 @@ export default class Dispatcher {
     }
 
     dispatch({category, config}) {
+        this._checkProps(config);
+
         if (isFunction(this[category])) {
             this[category](config);
         }
@@ -60,27 +97,23 @@ export default class Dispatcher {
     }
 
     addItem(config = {}) {
-        const uuid = config.uuid;
+        const {uuid, localPath} = config;
 
-        if (uuid) {
-            if (!this._transportCache[uuid]) {
-                this._transportCache[uuid] = new Transport(
-                    Object.assign({credentials: this._credentials}, config),
-                );
-            }
-
-            this.resumeItem({uuid});
+        if (!uuid) {
+            return;
         }
-    }
 
-    addPatch({uuid, bucketName, prefix, objectKeys = [], localPath, totalSize}) {
-        objectKeys.forEach(item => this.addItem({
-            uuid,
-            bucketName,
-            totalSize,
-            objectKey: path.posix.join(prefix, item),
-            localPath: path.join(localPath, item),
-        }));
+        const fileSize = fs.statSync(localPath).size;
+        if (!this._transportCache[uuid]) {
+            // 文件大于20mb则分片上传
+            const _ClassType = fileSize > 20 * 1024 * 1024 ? MultiTransport : Transport;
+
+            this._transportCache[uuid] = new _ClassType(
+                Object.assign({credentials: this._credentials}, config),
+            );
+        }
+
+        this.resumeItem({uuid});
     }
 
     pauseItem({uuid}) {
@@ -89,13 +122,6 @@ export default class Dispatcher {
         } else {
             this._send(NotifyPaused, {uuid});
         }
-    }
-
-    pauseAll() {
-        this._queue.remove((item) => {
-            item.data.pause();
-            return true;
-        });
     }
 
     resumeItem({uuid}) {

@@ -2,7 +2,7 @@
  * 文件下载模块
  *
  * @file src/downloader/Transport.js
- * @author 523317421@qq.com
+ * @author mudio(job.zhanghao@gmail.com)
  */
 
 import fs from 'fs';
@@ -95,7 +95,7 @@ export default class Transport extends EventEmitter {
         /**
          * 通知节流
          */
-        const _notifyRate = throttle(
+        const _notifyProgress = throttle(
             (rate, bytesWritten) => this.emit('rate', {
                 uuid: this._uuid,
                 objectKey: this._objectKey,
@@ -113,7 +113,7 @@ export default class Transport extends EventEmitter {
             const rangeTime = Date.now() - startDate;
             const rate = outputStream.bytesWritten / rangeTime; // kb/s
 
-            _notifyRate(rate, outputStream.bytesWritten + begin);
+            _notifyProgress(rate, outputStream.bytesWritten + begin);
 
             _checkAlive();
         });

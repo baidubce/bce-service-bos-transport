@@ -14947,16 +14947,15 @@ if (!(0, _lodash2.default)(process.send)) {
    * @author mudio(job.zhanghao@gmail.com)
    */
 
-const { BCE_AK, BCE_SK, BCE_BOS_ENDPOINT } = process.env;
+const { BCE_AK, BCE_SK } = process.env;
 
-if (!BCE_AK || !BCE_SK || !BCE_BOS_ENDPOINT) {
-    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK`, `BCE_BOS_ENDPOINT` env.');
+if (!BCE_AK || !BCE_SK) {
+    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK` env.');
     process.exit();
 }
 
 const _dispatcher = new _dispatcher3.default({
-    endpoint: BCE_BOS_ENDPOINT,
-    credentials: { ak: BCE_AK, sk: BCE_SK }
+    ak: BCE_AK, sk: BCE_SK
 });
 
 process.on('message', msg => _dispatcher.dispatch(msg));
@@ -15066,17 +15065,17 @@ class Dispatcher {
         process.send({ category: 'cmd', message: Object.assign({ command }, message) });
     }
 
-    dispatch({ category, config }) {
+    dispatch({ category, config, endpoint }) {
         this._checkProps(config);
 
         if ((0, _lodash2.default)(this[category])) {
-            this[category](config);
+            this[category](config, endpoint);
         }
 
         (0, _logger.debug)(`invoke ${category}, config = ${JSON.stringify(config)}`);
     }
 
-    addItem(config = {}) {
+    addItem(config = {}, endpoint) {
         const { uuid, localPath } = config;
 
         if (!uuid) {
@@ -15088,7 +15087,7 @@ class Dispatcher {
             // 文件大于20mb则分片上传
             const _ClassType = fileSize > 20 * 1024 * 1024 ? _multi_transport2.default : _transport2.default;
 
-            this._transportCache[uuid] = new _ClassType(Object.assign({ credentials: this._credentials }, config));
+            this._transportCache[uuid] = new _ClassType({ endpoint, credentials: this._credentials }, config);
         }
 
         this.resumeItem({ uuid });
@@ -15151,10 +15150,10 @@ __webpack_require__(74);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class Transport extends _events.EventEmitter {
-    constructor(config) {
+    constructor(credentials, config) {
         super();
 
-        const { uuid, bucketName, objectKey, localPath, credentials } = config;
+        const { uuid, bucketName, objectKey, localPath } = config;
 
         this._uuid = uuid;
         this._objectKey = objectKey;
@@ -15339,11 +15338,11 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 const kPartSize = 20 * 1024 * 1024;
 
 class MultiTransport extends _events.EventEmitter {
-    constructor(config) {
+    constructor(credentials, config) {
         super();
 
         this._checkAlive = (0, _lodash2.default)(() => this.pause(), this._timeout);
-        const { uuid, bucketName, objectKey, localPath, uploadId, credentials } = config;
+        const { uuid, bucketName, objectKey, localPath, uploadId } = config;
 
         this._uuid = uuid;
         this._uploadId = uploadId;
@@ -15543,7 +15542,7 @@ class MultiTransport extends _events.EventEmitter {
             try {
                 const totalSize = _fs2.default.statSync(_this._localPath).size;
                 // 如果文件大于阈值并且没有uploadId，则获取一次
-                if (totalSize > kPartSize * 2 && !_this._uploadId) {
+                if (!_this._uploadId) {
                     const { uploadId } = yield _this._initUploadId();
                     _this._uploadId = uploadId;
                 }

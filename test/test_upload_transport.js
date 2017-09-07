@@ -5,8 +5,8 @@ import MultiTransport from '../src/uploader/multi_transport';
 const _transport = new MultiTransport({
     uuid: 'test_uuid',
     bucketName: 'bce-bos-client',
-    objectKey: 'aaa.pptx',
-    localPath: '/Users/mudio/Desktop/aaa.pptx',
+    objectKey: 'v0.3.0-beta/bce-client-0.3.0-beta-nsis.exe',
+    localPath: '/Users/mudio/Desktop/v0.3.0-beta/bce-client-0.3.0-beta-nsis.exe',
     credentials: {
         endpoint: 'http://bos.qasandbox.bcetest.baidu.com',
         credentials: {

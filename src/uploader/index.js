@@ -17,16 +17,15 @@ if (!isFunction(process.send)) {
     info(`start uploader transport pid = ${process.pid}`);
 }
 
-const {BCE_AK, BCE_SK, BCE_BOS_ENDPOINT} = process.env;
+const {BCE_AK, BCE_SK} = process.env;
 
-if (!BCE_AK || !BCE_SK || !BCE_BOS_ENDPOINT) {
-    error('Not found `BCE_AK`,`BCE_SK`, `BCE_BOS_ENDPOINT` env.');
+if (!BCE_AK || !BCE_SK) {
+    error('Not found `BCE_AK`,`BCE_SK` env.');
     process.exit();
 }
 
 const _dispatcher = new Dispatcher({
-    endpoint: BCE_BOS_ENDPOINT,
-    credentials: {ak: BCE_AK, sk: BCE_SK},
+    ak: BCE_AK, sk: BCE_SK,
 });
 
 process.on('message', msg => _dispatcher.dispatch(msg));

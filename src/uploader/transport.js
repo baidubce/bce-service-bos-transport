@@ -15,10 +15,10 @@ import {CONTENT_LENGTH, CONTENT_TYPE} from 'bce-sdk-js/src/headers';
 import '../fake_client';
 
 export default class Transport extends EventEmitter {
-    constructor(config) {
+    constructor(credentials, config) {
         super();
 
-        const {uuid, bucketName, objectKey, localPath, credentials} = config;
+        const {uuid, bucketName, objectKey, localPath} = config;
 
         this._uuid = uuid;
         this._objectKey = objectKey;

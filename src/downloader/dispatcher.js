@@ -59,13 +59,14 @@ export default class Dispatcher {
         debug(`invoke ${category}, config = ${JSON.stringify(config)}`);
     }
 
-    addItem(config = {}) {
+    addItem(config = {}, endpoint) {
         const uuid = config.uuid;
 
         if (uuid) {
             if (!this._transportCache[uuid]) {
                 this._transportCache[uuid] = new Transport(
-                    Object.assign({credentials: this._credentials}, config),
+                    {endpoint, credentials: this._credentials},
+                    config,
                 );
             }
 

@@ -86,17 +86,17 @@ export default class Dispatcher {
         process.send({category: 'cmd', message: Object.assign({command}, message)});
     }
 
-    dispatch({category, config}) {
+    dispatch({category, config, endpoint}) {
         this._checkProps(config);
 
         if (isFunction(this[category])) {
-            this[category](config);
+            this[category](config, endpoint);
         }
 
         debug(`invoke ${category}, config = ${JSON.stringify(config)}`);
     }
 
-    addItem(config = {}) {
+    addItem(config = {}, endpoint) {
         const {uuid, localPath} = config;
 
         if (!uuid) {
@@ -109,7 +109,8 @@ export default class Dispatcher {
             const _ClassType = fileSize > 20 * 1024 * 1024 ? MultiTransport : Transport;
 
             this._transportCache[uuid] = new _ClassType(
-                Object.assign({credentials: this._credentials}, config),
+                {endpoint, credentials: this._credentials},
+                config,
             );
         }
 

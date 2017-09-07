@@ -17,10 +17,10 @@ import '../fake_client';
 const kPartSize = 20 * 1024 * 1024;
 
 export default class MultiTransport extends EventEmitter {
-    constructor(config) {
+    constructor(credentials, config) {
         super();
 
-        const {uuid, bucketName, objectKey, localPath, uploadId, credentials} = config;
+        const {uuid, bucketName, objectKey, localPath, uploadId} = config;
 
         this._uuid = uuid;
         this._uploadId = uploadId;
@@ -226,7 +226,7 @@ export default class MultiTransport extends EventEmitter {
         try {
             const totalSize = fs.statSync(this._localPath).size;
             // 如果文件大于阈值并且没有uploadId，则获取一次
-            if (totalSize > kPartSize * 2 && !this._uploadId) {
+            if (!this._uploadId) {
                 const {uploadId} = await this._initUploadId();
                 this._uploadId = uploadId;
             }

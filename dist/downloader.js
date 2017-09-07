@@ -14873,16 +14873,15 @@ if (!(0, _lodash2.default)(process.send)) {
    * @author mudio(job.zhanghao@gmail.com)
    */
 
-const { BCE_AK, BCE_SK, BCE_BOS_ENDPOINT } = process.env;
+const { BCE_AK, BCE_SK } = process.env;
 
-if (!BCE_AK || !BCE_SK || !BCE_BOS_ENDPOINT) {
-    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK`, `BCE_BOS_ENDPOINT` env.');
+if (!BCE_AK || !BCE_SK) {
+    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK` env.');
     process.exit();
 }
 
 const _dispatcher = new _dispatcher3.default({
-    endpoint: BCE_BOS_ENDPOINT,
-    credentials: { ak: BCE_AK, sk: BCE_SK }
+    ak: BCE_AK, sk: BCE_SK
 });
 
 process.on('message', msg => _dispatcher.dispatch(msg));
@@ -14970,12 +14969,12 @@ class Dispatcher {
         (0, _logger.debug)(`invoke ${category}, config = ${JSON.stringify(config)}`);
     }
 
-    addItem(config = {}) {
+    addItem(config = {}, endpoint) {
         const uuid = config.uuid;
 
         if (uuid) {
             if (!this._transportCache[uuid]) {
-                this._transportCache[uuid] = new _transport2.default(Object.assign({ credentials: this._credentials }, config));
+                this._transportCache[uuid] = new _transport2.default({ endpoint, credentials: this._credentials }, config);
             }
 
             this.resumeItem({ uuid });
@@ -15066,10 +15065,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 class Transport extends _events.EventEmitter {
-    constructor(config) {
+    constructor(credentials, config) {
         super();
 
-        const { uuid, bucketName, objectKey, localPath, credentials } = config;
+        const { uuid, bucketName, objectKey, localPath } = config;
 
         this._uuid = uuid;
         this._objectKey = objectKey;

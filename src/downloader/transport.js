@@ -72,7 +72,22 @@ export default class Transport extends EventEmitter {
 
         this._paused = true;
 
-        this.emit('error', {uuid: this._uuid, error: err.message});
+        if (typeof err === 'string') {
+            this.emit('error', {uuid: this._uuid, error: err});
+        } else if (err instanceof Error || typeof err.message === 'string') {
+            this.emit('error', {uuid: this._uuid, error: err.message});
+        } else if ('status_code' in err) {
+            this.emit('error', {uuid: this._uuid, error: `Server code = ${err.status_code}`});
+        } else {
+            this.emit('error', {uuid: this._uuid, error: '未知错误'});
+        }
+    }
+
+    _onTimeout() {
+        if (this._outputStream) {
+            this._outputStream.emit('error', new Error('网络连接超时'));
+            this._outputStream.end();
+        }
     }
 
     /**
@@ -90,7 +105,7 @@ export default class Transport extends EventEmitter {
         /**
          * 保证`WriteStream`一定可以被close掉
          */
-        const _checkAlive = debounce(() => this.pause(), this._timeout);
+        const _checkAlive = debounce(() => this._onTimeout(), this._timeout);
 
         /**
          * 通知节流

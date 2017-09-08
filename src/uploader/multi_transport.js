@@ -30,7 +30,6 @@ export default class MultiTransport extends EventEmitter {
         this._client = new BosClient(credentials);
 
         this._paused = true;
-        this._timeout = 10e3; // 10s
         this._queue = null;
     }
 
@@ -86,7 +85,15 @@ export default class MultiTransport extends EventEmitter {
 
         this._paused = true;
 
-        this.emit('error', {uuid: this._uuid, error: err.message});
+        if (typeof err === 'string') {
+            this.emit('error', {uuid: this._uuid, error: err});
+        } else if (err instanceof Error || typeof err.message === 'string') {
+            this.emit('error', {uuid: this._uuid, error: err.message});
+        } else if ('status_code' in err) {
+            this.emit('error', {uuid: this._uuid, error: `Server code = ${err.status_code}`});
+        } else {
+            this.emit('error', {uuid: this._uuid, error: '未知错误'});
+        }
     }
 
     // 最多分片1000片，除了最后一片其他片大小相等且大于等于UploadConfig.PartSize
@@ -114,7 +121,7 @@ export default class MultiTransport extends EventEmitter {
         return remainParts;
     }
 
-    _checkAlive = debounce(() => this.pause(), this._timeout);
+    _checkAlive = debounce(() => this._stream.emit('abort'), 10e3);
 
     _invoke({partNumber, partSize, start}, done) {
         /**
@@ -129,7 +136,7 @@ export default class MultiTransport extends EventEmitter {
          * 通知进度
          */
         this._stream.on('progress', ({rate, bytesWritten}) => {
-            //this._checkAlive();
+            this._checkAlive();
 
             this.emit('progress', {rate, bytesWritten: this._uploadedSize + bytesWritten, uuid: this._uuid});
         });

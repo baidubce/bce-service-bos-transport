@@ -14959,11 +14959,13 @@ class Dispatcher {
 
     _send(command, message = {}) {
         process.send({ category: 'cmd', message: Object.assign({ command }, message) });
+
+        (0, _logger.debug)(`invoke ${command}, config = ${JSON.stringify(message)}`);
     }
 
-    dispatch({ category, config }) {
+    dispatch({ category, config, endpoint }) {
         if ((0, _lodash2.default)(this[category])) {
-            this[category](config);
+            this[category](config, endpoint);
         }
 
         (0, _logger.debug)(`invoke ${category}, config = ${JSON.stringify(config)}`);
@@ -15122,7 +15124,22 @@ class Transport extends _events.EventEmitter {
 
         this._paused = true;
 
-        this.emit('error', { uuid: this._uuid, error: err.message });
+        if (typeof err === 'string') {
+            this.emit('error', { uuid: this._uuid, error: err });
+        } else if (err instanceof Error || typeof err.message === 'string') {
+            this.emit('error', { uuid: this._uuid, error: err.message });
+        } else if ('status_code' in err) {
+            this.emit('error', { uuid: this._uuid, error: `Server code = ${err.status_code}` });
+        } else {
+            this.emit('error', { uuid: this._uuid, error: '未知错误' });
+        }
+    }
+
+    _onTimeout() {
+        if (this._outputStream) {
+            this._outputStream.emit('error', new Error('网络连接超时'));
+            this._outputStream.end();
+        }
     }
 
     /**
@@ -15140,7 +15157,7 @@ class Transport extends _events.EventEmitter {
         /**
          * 保证`WriteStream`一定可以被close掉
          */
-        const _checkAlive = (0, _lodash2.default)(() => this.pause(), this._timeout);
+        const _checkAlive = (0, _lodash2.default)(() => this._onTimeout(), this._timeout);
 
         /**
          * 通知节流

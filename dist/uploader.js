@@ -15063,6 +15063,8 @@ class Dispatcher {
 
     _send(command, message = {}) {
         process.send({ category: 'cmd', message: Object.assign({ command }, message) });
+
+        (0, _logger.debug)(`invoke ${command}, config = ${JSON.stringify(message)}`);
     }
 
     dispatch({ category, config, endpoint }) {
@@ -15195,7 +15197,21 @@ class Transport extends _events.EventEmitter {
 
         this._paused = true;
 
-        this.emit('error', { uuid: this._uuid, error: err.message });
+        if (typeof err === 'string') {
+            this.emit('error', { uuid: this._uuid, error: err });
+        } else if (err instanceof Error || typeof err.message === 'string') {
+            this.emit('error', { uuid: this._uuid, error: err.message });
+        } else if ('status_code' in err) {
+            this.emit('error', { uuid: this._uuid, error: `Server code = ${err.status_code}` });
+        } else {
+            this.emit('error', { uuid: this._uuid, error: '未知错误' });
+        }
+    }
+
+    _onTimeout() {
+        if (this._stream) {
+            this._stream.emit('abort');
+        }
     }
 
     /**
@@ -15228,7 +15244,7 @@ class Transport extends _events.EventEmitter {
         /**
          * 检查超时
          */
-        const _checkAlive = (0, _lodash2.default)(() => this.pause(), this._timeout);
+        const _checkAlive = (0, _lodash2.default)(() => this._onTimeout(), this._timeout);
 
         /**
          * 通知进度
@@ -15341,7 +15357,7 @@ class MultiTransport extends _events.EventEmitter {
     constructor(credentials, config) {
         super();
 
-        this._checkAlive = (0, _lodash2.default)(() => this.pause(), this._timeout);
+        this._checkAlive = (0, _lodash2.default)(() => this._stream.emit('abort'), 10e3);
         const { uuid, bucketName, objectKey, localPath, uploadId } = config;
 
         this._uuid = uuid;
@@ -15352,7 +15368,6 @@ class MultiTransport extends _events.EventEmitter {
         this._client = new _bceSdkJs.BosClient(credentials);
 
         this._paused = true;
-        this._timeout = 10e3; // 10s
         this._queue = null;
     }
 
@@ -15406,7 +15421,15 @@ class MultiTransport extends _events.EventEmitter {
 
         this._paused = true;
 
-        this.emit('error', { uuid: this._uuid, error: err.message });
+        if (typeof err === 'string') {
+            this.emit('error', { uuid: this._uuid, error: err });
+        } else if (err instanceof Error || typeof err.message === 'string') {
+            this.emit('error', { uuid: this._uuid, error: err.message });
+        } else if ('status_code' in err) {
+            this.emit('error', { uuid: this._uuid, error: `Server code = ${err.status_code}` });
+        } else {
+            this.emit('error', { uuid: this._uuid, error: '未知错误' });
+        }
     }
 
     // 最多分片1000片，除了最后一片其他片大小相等且大于等于UploadConfig.PartSize
@@ -15447,7 +15470,7 @@ class MultiTransport extends _events.EventEmitter {
          * 通知进度
          */
         this._stream.on('progress', ({ rate, bytesWritten }) => {
-            //this._checkAlive();
+            this._checkAlive();
 
             this.emit('progress', { rate, bytesWritten: this._uploadedSize + bytesWritten, uuid: this._uuid });
         });

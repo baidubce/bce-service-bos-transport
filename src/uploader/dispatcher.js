@@ -84,6 +84,8 @@ export default class Dispatcher {
 
     _send(command, message = {}) {
         process.send({category: 'cmd', message: Object.assign({command}, message)});
+
+        debug(`invoke ${command}, config = ${JSON.stringify(message)}`);
     }
 
     dispatch({category, config, endpoint}) {

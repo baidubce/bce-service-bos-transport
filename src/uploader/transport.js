@@ -60,7 +60,21 @@ export default class Transport extends EventEmitter {
 
         this._paused = true;
 
-        this.emit('error', {uuid: this._uuid, error: err.message});
+        if (typeof err === 'string') {
+            this.emit('error', {uuid: this._uuid, error: err});
+        } else if (err instanceof Error || typeof err.message === 'string') {
+            this.emit('error', {uuid: this._uuid, error: err.message});
+        } else if ('status_code' in err) {
+            this.emit('error', {uuid: this._uuid, error: `Server code = ${err.status_code}`});
+        } else {
+            this.emit('error', {uuid: this._uuid, error: '未知错误'});
+        }
+    }
+
+    _onTimeout() {
+        if (this._stream) {
+            this._stream.emit('abort');
+        }
     }
 
     /**
@@ -93,7 +107,7 @@ export default class Transport extends EventEmitter {
         /**
          * 检查超时
          */
-        const _checkAlive = debounce(() => this.pause(), this._timeout);
+        const _checkAlive = debounce(() => this._onTimeout(), this._timeout);
 
         /**
          * 通知进度

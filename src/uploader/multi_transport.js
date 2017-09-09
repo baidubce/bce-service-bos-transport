@@ -98,6 +98,18 @@ export default class MultiTransport extends EventEmitter {
         }
     }
 
+    async _computedFileMD5() {
+        const {size} = fs.statSync(this._localPath);
+
+        // 如果文件小于4G,则算下md5
+        if (!this._md5sum && !size < 4 * 1024 * 1024 * 1024) {
+            const fp = fs.createReadStream(this._localPath);
+            this._md5sum = await crypto.md5stream(fp);
+        }
+
+        return this._md5sum;
+    }
+
     /**
      * 检查文件一致性
      *
@@ -127,8 +139,10 @@ export default class MultiTransport extends EventEmitter {
         if (size === xMetaSize) {
             if (xMetaFrom === TransportOrigin) {
                 // 如果MD5存在则验证MD5
-                if (xMetaMD5 && this._md5sum) {
-                    if (xMetaMD5 !== this._md5sum) {
+                if (xMetaMD5) {
+                    const md5sum = await this._computedFileMD5();
+
+                    if (xMetaMD5 !== md5sum) {
                         return false;
                     }
                 } else if (mtimeMs !== xMetaModifiedTime) {
@@ -231,13 +245,14 @@ export default class MultiTransport extends EventEmitter {
         const {mtimeMs} = fs.statSync(this._localPath);
         // 排下序
         const orderedPartList = parts.sort((lhs, rhs) => lhs.partNumber - rhs.partNumber);
+        const md5sum = await this._computedFileMD5();
 
         await this._client.completeMultipartUpload(
             this._bucketName, this._objectKey, this._uploadId, orderedPartList,
             {
                 [Meta.xMetaFrom]: TransportOrigin,
                 [Meta.xMetaMTime]: mtimeMs,
-                [Meta.xMetaMD5]: this._md5sum,
+                [Meta.xMetaMD5]: md5sum,
             },
         );
     }
@@ -299,19 +314,13 @@ export default class MultiTransport extends EventEmitter {
         try {
             const {size} = fs.statSync(this._localPath);
 
-            // 如果文件小于4G,则算下md5
-            if (size < 4 * 1024 * 1024 * 1024) {
-                const fp = fs.createReadStream(this._localPath);
-                this._md5sum = await crypto.md5stream(fp);
-            }
-
-            // 先检查如果文件已经在bos上了，则忽略
-            if (await this._checkConsistency()) {
-                return this._checkFinish();
-            }
-
             // 如果文件大于阈值并且没有uploadId，则获取一次
             if (!this._uploadId) {
+                // 先检查如果文件已经在bos上了，则忽略
+                if (await this._checkConsistency()) {
+                    return this._checkFinish();
+                }
+
                 const {uploadId} = await this._initUploadId();
                 this._uploadId = uploadId;
             }

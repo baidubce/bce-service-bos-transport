@@ -15246,6 +15246,22 @@ class Transport extends _events.EventEmitter {
         }
     }
 
+    _computedFileMD5() {
+        var _this = this;
+
+        return _asyncToGenerator(function* () {
+            const { size } = _fs2.default.statSync(_this._localPath);
+
+            // 如果文件小于4G,则算下md5
+            if (!_this._md5sum && !size < 4 * 1024 * 1024 * 1024) {
+                const fp = _fs2.default.createReadStream(_this._localPath);
+                _this._md5sum = yield _crypto2.default.md5stream(fp);
+            }
+
+            return _this._md5sum;
+        })();
+    }
+
     /**
      * 检查文件一致性
      *
@@ -15257,14 +15273,14 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     _checkConsistency() {
-        var _this = this;
+        var _this2 = this;
 
         return _asyncToGenerator(function* () {
             let _meta = null;
-            const { mtimeMs, size } = _fs2.default.statSync(_this._localPath);
+            const { mtimeMs, size } = _fs2.default.statSync(_this2._localPath);
 
             try {
-                _meta = yield _this._fetchMetadata();
+                _meta = yield _this2._fetchMetadata();
             } catch (ex) {
                 if (ex.status_code === 404) {
                     return false;
@@ -15277,9 +15293,12 @@ class Transport extends _events.EventEmitter {
 
             if (size === xMetaSize) {
                 if (xMetaFrom === _headers2.TransportOrigin) {
-                    // 如果MD5存在则验证MD5
-                    if (xMetaMD5 && xMetaMD5 !== _this._md5sum) {
-                        return false;
+                    if (xMetaMD5) {
+                        const md5sum = yield _this2._computedFileMD5();
+                        // 如果MD5存在则验证MD5
+                        if (xMetaMD5 !== md5sum) {
+                            return false;
+                        }
                     }
                     // 如果MD5不存在，则验证`mtimeMs`
                     if (!xMetaMD5 && mtimeMs !== xMetaModifiedTime) {
@@ -15324,7 +15343,7 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     resume() {
-        var _this2 = this;
+        var _this3 = this;
 
         return _asyncToGenerator(function* () {
             const options = {};
@@ -15332,39 +15351,40 @@ class Transport extends _events.EventEmitter {
             /**
              * 读取文件大小
              */
-            const { mtimeMs, size } = _fs2.default.statSync(_this2._localPath);
+            const { mtimeMs, size } = _fs2.default.statSync(_this3._localPath);
+            const md5sum = yield _this3._computedFileMD5();
 
             /**
              * 设置`Content-Length`
              */
             options[_headers.CONTENT_LENGTH] = size;
-            options[_headers.CONTENT_TYPE] = _bceSdkJs.MimeType.guess(_path2.default.extname(_this2._localPath));
+            options[_headers.CONTENT_TYPE] = _bceSdkJs.MimeType.guess(_path2.default.extname(_this3._localPath));
             options[_headers2.Meta.xMetaFrom] = _headers2.TransportOrigin;
             options[_headers2.Meta.xMetaMTime] = mtimeMs;
-            options[_headers2.Meta.xMetaMD5] = _this2._md5sum;
+            options[_headers2.Meta.xMetaMD5] = md5sum;
 
             /**
              * 读取流
              */
-            _this2._stream = _fs2.default.createReadStream(_this2._localPath);
+            _this3._stream = _fs2.default.createReadStream(_this3._localPath);
 
             /**
              * 检查超时
              */
             const _checkAlive = (0, _lodash2.default)(function () {
-                return _this2._onTimeout();
-            }, _this2._timeout);
+                return _this3._onTimeout();
+            }, _this3._timeout);
 
             /**
              * 通知进度
              */
-            _this2._stream.on('progress', function ({ rate, bytesWritten }) {
+            _this3._stream.on('progress', function ({ rate, bytesWritten }) {
                 _checkAlive();
 
-                _this2.emit('progress', { rate, bytesWritten, uuid: _this2._uuid });
+                _this3.emit('progress', { rate, bytesWritten, uuid: _this3._uuid });
             });
 
-            return _this2._client.putObject(_this2._bucketName, _this2._objectKey, _this2._stream, options);
+            return _this3._client.putObject(_this3._bucketName, _this3._objectKey, _this3._stream, options);
         })();
     }
 
@@ -15389,38 +15409,35 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     start() {
-        var _this3 = this;
+        var _this4 = this;
 
         return _asyncToGenerator(function* () {
             /**
              * 重置状态
              */
-            _this3._paused = false;
+            _this4._paused = false;
 
             /**
              * 文件不存在还玩个蛋
              */
-            const isExist = _fs2.default.existsSync(_this3._localPath);
+            const isExist = _fs2.default.existsSync(_this4._localPath);
             if (!isExist) {
-                return _this3._checkError(new Error(`file not found ${_this3.localPath}`));
+                return _this4._checkError(new Error(`file not found ${_this4.localPath}`));
             }
 
             try {
-                const fp = _fs2.default.createReadStream(_this3._localPath);
-                _this3._md5sum = yield _crypto2.default.md5stream(fp);
-
                 // 先检查如果文件已经在bos上了，则忽略
-                if (yield _this3._checkConsistency()) {
-                    return _this3._checkFinish();
+                if (yield _this4._checkConsistency()) {
+                    return _this4._checkFinish();
                 }
 
-                _this3.emit('start', { uuid: _this3._uuid });
+                _this4.emit('start', { uuid: _this4._uuid });
 
-                yield _this3.resume();
+                yield _this4.resume();
 
-                _this3._checkFinish();
+                _this4._checkFinish();
             } catch (ex) {
-                _this3._checkError(ex);
+                _this4._checkError(ex);
             }
         })();
     }
@@ -15558,6 +15575,22 @@ class MultiTransport extends _events.EventEmitter {
         }
     }
 
+    _computedFileMD5() {
+        var _this = this;
+
+        return _asyncToGenerator(function* () {
+            const { size } = _fs2.default.statSync(_this._localPath);
+
+            // 如果文件小于4G,则算下md5
+            if (!_this._md5sum && !size < 4 * 1024 * 1024 * 1024) {
+                const fp = _fs2.default.createReadStream(_this._localPath);
+                _this._md5sum = yield _crypto2.default.md5stream(fp);
+            }
+
+            return _this._md5sum;
+        })();
+    }
+
     /**
      * 检查文件一致性
      *
@@ -15569,14 +15602,14 @@ class MultiTransport extends _events.EventEmitter {
      * @memberof Transport
      */
     _checkConsistency() {
-        var _this = this;
+        var _this2 = this;
 
         return _asyncToGenerator(function* () {
             let _meta = null;
-            const { mtimeMs, size } = _fs2.default.statSync(_this._localPath);
+            const { mtimeMs, size } = _fs2.default.statSync(_this2._localPath);
 
             try {
-                _meta = yield _this._fetchMetadata();
+                _meta = yield _this2._fetchMetadata();
             } catch (ex) {
                 if (ex.status_code === 404) {
                     return false;
@@ -15590,8 +15623,10 @@ class MultiTransport extends _events.EventEmitter {
             if (size === xMetaSize) {
                 if (xMetaFrom === _headers2.TransportOrigin) {
                     // 如果MD5存在则验证MD5
-                    if (xMetaMD5 && _this._md5sum) {
-                        if (xMetaMD5 !== _this._md5sum) {
+                    if (xMetaMD5) {
+                        const md5sum = yield _this2._computedFileMD5();
+
+                        if (xMetaMD5 !== md5sum) {
                             return false;
                         }
                     } else if (mtimeMs !== xMetaModifiedTime) {
@@ -15686,20 +15721,21 @@ class MultiTransport extends _events.EventEmitter {
     }
 
     _completeUpload() {
-        var _this2 = this;
+        var _this3 = this;
 
         return _asyncToGenerator(function* () {
-            const { parts } = yield _this2._fetchParts();
-            const { mtimeMs } = _fs2.default.statSync(_this2._localPath);
+            const { parts } = yield _this3._fetchParts();
+            const { mtimeMs } = _fs2.default.statSync(_this3._localPath);
             // 排下序
             const orderedPartList = parts.sort(function (lhs, rhs) {
                 return lhs.partNumber - rhs.partNumber;
             });
+            const md5sum = yield _this3._computedFileMD5();
 
-            yield _this2._client.completeMultipartUpload(_this2._bucketName, _this2._objectKey, _this2._uploadId, orderedPartList, {
+            yield _this3._client.completeMultipartUpload(_this3._bucketName, _this3._objectKey, _this3._uploadId, orderedPartList, {
                 [_headers2.Meta.xMetaFrom]: _headers2.TransportOrigin,
                 [_headers2.Meta.xMetaMTime]: mtimeMs,
-                [_headers2.Meta.xMetaMD5]: _this2._md5sum
+                [_headers2.Meta.xMetaMD5]: md5sum
             });
         })();
     }
@@ -15745,66 +15781,60 @@ class MultiTransport extends _events.EventEmitter {
      * @memberof MultiTransport
      */
     start() {
-        var _this3 = this;
+        var _this4 = this;
 
         return _asyncToGenerator(function* () {
             /**
              * 重置状态
              */
-            _this3._paused = false;
+            _this4._paused = false;
 
             /**
              * 文件不存在还玩个蛋
              */
-            const isExist = _fs2.default.existsSync(_this3._localPath);
+            const isExist = _fs2.default.existsSync(_this4._localPath);
             if (!isExist) {
-                return _this3._checkError(new Error(`file not found ${_this3.localPath}`));
+                return _this4._checkError(new Error(`file not found ${_this4.localPath}`));
             }
 
             try {
-                const { size } = _fs2.default.statSync(_this3._localPath);
-
-                // 如果文件小于4G,则算下md5
-                if (size < 4 * 1024 * 1024 * 1024) {
-                    const fp = _fs2.default.createReadStream(_this3._localPath);
-                    _this3._md5sum = yield _crypto2.default.md5stream(fp);
-                }
-
-                // 先检查如果文件已经在bos上了，则忽略
-                if (yield _this3._checkConsistency()) {
-                    return _this3._checkFinish();
-                }
+                const { size } = _fs2.default.statSync(_this4._localPath);
 
                 // 如果文件大于阈值并且没有uploadId，则获取一次
-                if (!_this3._uploadId) {
-                    const { uploadId } = yield _this3._initUploadId();
-                    _this3._uploadId = uploadId;
+                if (!_this4._uploadId) {
+                    // 先检查如果文件已经在bos上了，则忽略
+                    if (yield _this4._checkConsistency()) {
+                        return _this4._checkFinish();
+                    }
+
+                    const { uploadId } = yield _this4._initUploadId();
+                    _this4._uploadId = uploadId;
                 }
                 // 获取已上传到分片
-                const { parts, maxParts } = yield _this3._fetchParts();
+                const { parts, maxParts } = yield _this4._fetchParts();
                 // 重新分片
                 const orderedParts = parts.sort(function (lhs, rhs) {
                     return lhs.partNumber - rhs.partNumber;
                 });
-                _this3._uploadedSize = parts.reduce(function (pre, cur) {
+                _this4._uploadedSize = parts.reduce(function (pre, cur) {
                     return pre + cur.size;
                 }, 0);
-                const remainParts = _this3._decompose(orderedParts, maxParts, _this3._uploadedSize, size);
+                const remainParts = _this4._decompose(orderedParts, maxParts, _this4._uploadedSize, size);
                 // 上传遗留的分片
                 if (remainParts.length > 0) {
-                    _this3.emit('start', {
-                        uuid: _this3._uuid,
-                        uploadId: _this3._uploadId,
-                        localPath: _this3._localPath
+                    _this4.emit('start', {
+                        uuid: _this4._uuid,
+                        uploadId: _this4._uploadId,
+                        localPath: _this4._localPath
                     });
-                    yield _this3.resume(remainParts);
+                    yield _this4.resume(remainParts);
                 }
                 // 完成任务,用文件大小来效验文件一致性
-                yield _this3._completeUpload();
+                yield _this4._completeUpload();
                 // 检查任务完成状态
-                _this3._checkFinish();
+                _this4._checkFinish();
             } catch (ex) {
-                _this3._checkError(ex);
+                _this4._checkError(ex);
             }
         })();
     }

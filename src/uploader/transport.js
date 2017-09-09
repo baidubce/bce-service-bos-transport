@@ -73,6 +73,18 @@ export default class Transport extends EventEmitter {
         }
     }
 
+    async _computedFileMD5() {
+        const {size} = fs.statSync(this._localPath);
+
+        // 如果文件小于4G,则算下md5
+        if (!this._md5sum && !size < 4 * 1024 * 1024 * 1024) {
+            const fp = fs.createReadStream(this._localPath);
+            this._md5sum = await crypto.md5stream(fp);
+        }
+
+        return this._md5sum;
+    }
+
     /**
      * 检查文件一致性
      *
@@ -101,9 +113,12 @@ export default class Transport extends EventEmitter {
 
         if (size === xMetaSize) {
             if (xMetaFrom === TransportOrigin) {
-                // 如果MD5存在则验证MD5
-                if (xMetaMD5 && xMetaMD5 !== this._md5sum) {
-                    return false;
+                if (xMetaMD5) {
+                    const md5sum = await this._computedFileMD5();
+                    // 如果MD5存在则验证MD5
+                    if (xMetaMD5 !== md5sum) {
+                        return false;
+                    }
                 }
                 // 如果MD5不存在，则验证`mtimeMs`
                 if (!xMetaMD5 && mtimeMs !== xMetaModifiedTime) {
@@ -153,6 +168,7 @@ export default class Transport extends EventEmitter {
          * 读取文件大小
          */
         const {mtimeMs, size} = fs.statSync(this._localPath);
+        const md5sum = await this._computedFileMD5();
 
         /**
          * 设置`Content-Length`
@@ -161,7 +177,7 @@ export default class Transport extends EventEmitter {
         options[CONTENT_TYPE] = MimeType.guess(path.extname(this._localPath));
         options[Meta.xMetaFrom] = TransportOrigin;
         options[Meta.xMetaMTime] = mtimeMs;
-        options[Meta.xMetaMD5] = this._md5sum;
+        options[Meta.xMetaMD5] = md5sum;
 
         /**
          * 读取流
@@ -220,9 +236,6 @@ export default class Transport extends EventEmitter {
         }
 
         try {
-            const fp = fs.createReadStream(this._localPath);
-            this._md5sum = await crypto.md5stream(fp);
-
             // 先检查如果文件已经在bos上了，则忽略
             if (await this._checkConsistency()) {
                 return this._checkFinish();

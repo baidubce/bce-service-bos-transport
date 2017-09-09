@@ -14,8 +14,8 @@ const _transport = new MultiTransport(
     {
         uuid: 'test_uuid',
         bucketName: 'bce-bos-client',
-        objectKey: 'v0.3.0-beta/bce-client-0.3.0-beta-nsis.exe',
-        localPath: '/Users/mudio/Desktop/v0.3.0-beta/bce-client-0.3.0-beta-nsis.exe',
+        objectKey: '40',
+        localPath: '/Users/mudio/Desktop/tmp/40mb',
     },
 );
 

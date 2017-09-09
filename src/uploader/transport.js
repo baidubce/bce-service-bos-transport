@@ -9,10 +9,12 @@ import fs from 'fs';
 import path from 'path';
 import {EventEmitter} from 'events';
 import debounce from 'lodash.debounce';
+import crypto from 'bce-sdk-js/src/crypto';
 import {BosClient, MimeType} from 'bce-sdk-js';
 import {CONTENT_LENGTH, CONTENT_TYPE} from 'bce-sdk-js/src/headers';
 
 import '../fake_client';
+import {TransportOrigin, Meta} from '../headers';
 
 export default class Transport extends EventEmitter {
     constructor(credentials, config) {
@@ -71,6 +73,68 @@ export default class Transport extends EventEmitter {
         }
     }
 
+    /**
+     * 检查文件一致性
+     *
+     * 1. 非客户端上传的文件只检查文件大小
+     * 2. 客户端上传的文件优先检查`MD5`
+     * 3. 大文件考虑到计算性能的问题，只检查`mtime`
+     *
+     * @returns {boolean}
+     * @memberof Transport
+     */
+    async _checkConsistency() {
+        let _meta = null;
+        const {mtimeMs, size} = fs.statSync(this._localPath);
+
+        try {
+            _meta = await this._fetchMetadata();
+        } catch (ex) {
+            if (ex.status_code === 404) {
+                return false;
+            }
+
+            throw ex;
+        }
+
+        const {xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5} = _meta;
+
+        if (size === xMetaSize) {
+            if (xMetaFrom === TransportOrigin) {
+                // 如果MD5存在则验证MD5
+                if (xMetaMD5 && xMetaMD5 !== this._md5sum) {
+                    return false;
+                }
+                // 如果MD5不存在，则验证`mtimeMs`
+                if (!xMetaMD5 && mtimeMs !== xMetaModifiedTime) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 获取Meta数据
+     *
+     * @param {string} bucketName
+     * @param {string} key
+     * @returns {Promise}
+     * @memberof MultiTransport
+     */
+    _fetchMetadata() {
+        return this._client.getObjectMetadata(this._bucketName, this._objectKey).then((res) => {
+            const xMetaSize = +res.http_headers['content-length'];
+            const xMetaMD5 = res.http_headers[Meta.xMetaMD5];
+            const xMetaFrom = res.http_headers[Meta.xMetaFrom];
+            const xMetaModifiedTime = +res.http_headers[Meta.xMetaMTime];
+
+            return {xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5};
+        });
+    }
+
     _onTimeout() {
         if (this._stream) {
             this._stream.emit('abort');
@@ -82,27 +146,27 @@ export default class Transport extends EventEmitter {
      *
      * @memberof Transport
      */
-    resume() {
+    async resume() {
         const options = {};
 
         /**
          * 读取文件大小
          */
-        const contentLength = fs.statSync(this._localPath).size;
+        const {mtimeMs, size} = fs.statSync(this._localPath);
 
         /**
          * 设置`Content-Length`
          */
-        options[CONTENT_LENGTH] = contentLength;
+        options[CONTENT_LENGTH] = size;
         options[CONTENT_TYPE] = MimeType.guess(path.extname(this._localPath));
+        options[Meta.xMetaFrom] = TransportOrigin;
+        options[Meta.xMetaMTime] = mtimeMs;
+        options[Meta.xMetaMD5] = this._md5sum;
 
         /**
          * 读取流
          */
-        this._stream = fs.createReadStream(this._localPath, {
-            start: 0,
-            end: Math.max(0, contentLength - 1),
-        });
+        this._stream = fs.createReadStream(this._localPath);
 
         /**
          * 检查超时
@@ -118,10 +182,7 @@ export default class Transport extends EventEmitter {
             this.emit('progress', {rate, bytesWritten, uuid: this._uuid});
         });
 
-        return this._client.putObject(this._bucketName, this._objectKey, this._stream, options).then(
-            () => this._checkFinish(),
-            err => this._checkError(err),
-        );
+        return this._client.putObject(this._bucketName, this._objectKey, this._stream, options);
     }
 
     /**
@@ -144,7 +205,7 @@ export default class Transport extends EventEmitter {
      *
      * @memberof Transport
      */
-    start() {
+    async start() {
         /**
          * 重置状态
          */
@@ -159,8 +220,19 @@ export default class Transport extends EventEmitter {
         }
 
         try {
+            const fp = fs.createReadStream(this._localPath);
+            this._md5sum = await crypto.md5stream(fp);
+
+            // 先检查如果文件已经在bos上了，则忽略
+            if (await this._checkConsistency()) {
+                return this._checkFinish();
+            }
+
             this.emit('start', {uuid: this._uuid});
-            this.resume();
+
+            await this.resume();
+
+            this._checkFinish();
         } catch (ex) {
             this._checkError(ex);
         }

@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 79);
+/******/ 	return __webpack_require__(__webpack_require__.s = 80);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1654,8 +1654,8 @@ var Q = __webpack_require__(4);
 var u = __webpack_require__(1);
 
 var config = __webpack_require__(50);
-var Auth = __webpack_require__(10);
-var HttpClient = __webpack_require__(8);
+var Auth = __webpack_require__(11);
+var HttpClient = __webpack_require__(9);
 var H = __webpack_require__(7);
 
 /**
@@ -3935,6 +3935,94 @@ exports.ACCEPT = 'accept';
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  *
+ * @file src/crypto.js
+ * @author leeight
+ */
+
+/* eslint-env node */
+
+var fs = __webpack_require__(3);
+var crypto = __webpack_require__(15);
+
+var Q = __webpack_require__(4);
+
+exports.md5sum = function (data, enc, digest) {
+    if (!Buffer.isBuffer(data)) {
+        data = new Buffer(data, enc || 'UTF-8');
+    }
+
+    var md5 = crypto.createHash('md5');
+    md5.update(data);
+
+    return md5.digest(digest || 'base64');
+};
+
+exports.md5stream = function (stream, digest) {
+    var deferred = Q.defer();
+
+    var md5 = crypto.createHash('md5');
+    stream.on('data', function (chunk) {
+        md5.update(chunk);
+    });
+    stream.on('end', function () {
+        deferred.resolve(md5.digest(digest || 'base64'));
+    });
+    stream.on('error', function (error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
+};
+
+exports.md5file = function (filename, digest) {
+    return exports.md5stream(fs.createReadStream(filename), digest);
+};
+
+exports.md5blob = function (blob, digest) {
+    var deferred = Q.defer();
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(blob);
+    reader.onerror = function (e) {
+        deferred.reject(reader.error);
+    };
+    reader.onloadend = function (e) {
+        if (e.target.readyState === FileReader.DONE) {
+            var content = e.target.result;
+            var md5 = exports.md5sum(content, null, digest);
+            deferred.resolve(md5);
+        }
+    };
+    return deferred.promise;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
  * @file src/http_client.js
  * @author leeight
  */
@@ -4337,7 +4425,7 @@ module.exports = HttpClient;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4568,7 +4656,7 @@ function getTasks(data, uploadId, bucket, object, size, partSize) {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4739,94 +4827,6 @@ module.exports = Auth;
 
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- *
- * @file src/crypto.js
- * @author leeight
- */
-
-/* eslint-env node */
-
-var fs = __webpack_require__(3);
-var crypto = __webpack_require__(15);
-
-var Q = __webpack_require__(4);
-
-exports.md5sum = function (data, enc, digest) {
-    if (!Buffer.isBuffer(data)) {
-        data = new Buffer(data, enc || 'UTF-8');
-    }
-
-    var md5 = crypto.createHash('md5');
-    md5.update(data);
-
-    return md5.digest(digest || 'base64');
-};
-
-exports.md5stream = function (stream, digest) {
-    var deferred = Q.defer();
-
-    var md5 = crypto.createHash('md5');
-    stream.on('data', function (chunk) {
-        md5.update(chunk);
-    });
-    stream.on('end', function () {
-        deferred.resolve(md5.digest(digest || 'base64'));
-    });
-    stream.on('error', function (error) {
-        deferred.reject(error);
-    });
-
-    return deferred.promise;
-};
-
-exports.md5file = function (filename, digest) {
-    return exports.md5stream(fs.createReadStream(filename), digest);
-};
-
-exports.md5blob = function (blob, digest) {
-    var deferred = Q.defer();
-
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(blob);
-    reader.onerror = function (e) {
-        deferred.reject(reader.error);
-    };
-    reader.onloadend = function (e) {
-        if (e.target.readyState === FileReader.DONE) {
-            var content = e.target.result;
-            var md5 = exports.md5sum(content, null, digest);
-            deferred.resolve(md5);
-        }
-    };
-    return deferred.promise;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-/***/ }),
 /* 12 */
 /***/ (function(module, exports) {
 
@@ -4883,9 +4883,9 @@ var Q = __webpack_require__(4);
 
 var H = __webpack_require__(7);
 var strings = __webpack_require__(26);
-var Auth = __webpack_require__(10);
-var crypto = __webpack_require__(11);
-var HttpClient = __webpack_require__(8);
+var Auth = __webpack_require__(11);
+var crypto = __webpack_require__(8);
+var HttpClient = __webpack_require__(9);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
 var WMStream = __webpack_require__(51);
@@ -7065,7 +7065,7 @@ const error = exports.error = msg => logger('error', msg);
  */
 
 exports.Q = __webpack_require__(4);
-exports.Auth = __webpack_require__(10);
+exports.Auth = __webpack_require__(11);
 exports.BosClient = __webpack_require__(16);
 exports.BcsClient = __webpack_require__(53);
 exports.BccClient = __webpack_require__(54);
@@ -7076,7 +7076,7 @@ exports.MctClient = __webpack_require__(58);
 exports.FaceClient = __webpack_require__(59);
 exports.OCRClient = __webpack_require__(60);
 exports.MediaClient = __webpack_require__(61);
-exports.HttpClient = __webpack_require__(8);
+exports.HttpClient = __webpack_require__(9);
 exports.MimeType = __webpack_require__(18);
 exports.STS = __webpack_require__(62);
 exports.VodClient = __webpack_require__(63);
@@ -7366,7 +7366,7 @@ var u = __webpack_require__(1);
 var debug = __webpack_require__(5)('bce-sdk:VodClient.Statistic');
 
 var BceBaseClient = __webpack_require__(2);
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 
 /**
  * 音视频统计接口
@@ -9437,7 +9437,7 @@ var fs = __webpack_require__(3);
 var u = __webpack_require__(1);
 
 var H = __webpack_require__(7);
-var HttpClient = __webpack_require__(8);
+var HttpClient = __webpack_require__(9);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
 
@@ -9586,7 +9586,7 @@ BcsClient.prototype.putObjectFromBlob = function (bucketName, key, blob, options
 BcsClient.prototype.putObjectFromString = function (bucketName, key, data, options) {
     var headers = {};
     headers[H.CONTENT_LENGTH] = Buffer.byteLength(data);
-    headers[H.CONTENT_MD5] = __webpack_require__(11).md5sum(data, null, 'hex');
+    headers[H.CONTENT_MD5] = __webpack_require__(8).md5sum(data, null, 'hex');
     options = u.extend(headers, options);
 
     return this.putObject(bucketName, key, data, options);
@@ -9607,7 +9607,7 @@ BcsClient.prototype.putObjectFromFile = function (bucketName, key, filename, opt
     var fp = fs.createReadStream(filename);
     if (!u.has(options, H.CONTENT_MD5)) {
         var me = this;
-        return __webpack_require__(11).md5file(filename, 'hex')
+        return __webpack_require__(8).md5file(filename, 'hex')
             .then(function (md5sum) {
                 options[H.CONTENT_MD5] = md5sum;
                 return me.putObject(bucketName, key, fp, options);
@@ -11572,8 +11572,8 @@ var util = __webpack_require__(0);
 
 var u = __webpack_require__(1);
 
-var Auth = __webpack_require__(10);
-var HttpClient = __webpack_require__(8);
+var Auth = __webpack_require__(11);
+var HttpClient = __webpack_require__(9);
 var BceBaseClient = __webpack_require__(2);
 
 /**
@@ -11890,7 +11890,7 @@ var url = __webpack_require__(12);
 
 var BceBaseClient = __webpack_require__(2);
 var BosClient = __webpack_require__(16);
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Media = __webpack_require__(65);
 var Notification = __webpack_require__(66);
 var Player = __webpack_require__(67);
@@ -13291,7 +13291,7 @@ var debug = __webpack_require__(5)('bce-sdk:VodClient.Media');
 var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Statistic = __webpack_require__(27);
 
 /**
@@ -13663,7 +13663,7 @@ var u = __webpack_require__(1);
 var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 
 
 /**
@@ -13993,8 +13993,8 @@ var debug = __webpack_require__(5)('bce-sdk:Document');
 
 var BosClient = __webpack_require__(16);
 var BceBaseClient = __webpack_require__(2);
-var UploadHelper = __webpack_require__(9);
-var crypto = __webpack_require__(11);
+var UploadHelper = __webpack_require__(10);
+var crypto = __webpack_require__(8);
 
 var DATA_TYPE_FILE     = 1;
 var DATA_TYPE_BUFFER   = 2;
@@ -14913,11 +14913,36 @@ _bceSdkJs.HttpClient.prototype._sendRequest = (req, readStream = '') => {
     */
 
 /***/ }),
-/* 75 */,
+/* 75 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * Headers
+ *
+ * @file src/headers.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+const Meta = exports.Meta = {
+  xMetaFrom: 'x-bce-meta-from',
+  xMetaMTime: 'x-bce-meta-mtime',
+  xMetaMD5: 'x-bce-meta-md5'
+};
+
+const TransportOrigin = exports.TransportOrigin = 'bce-client';
+
+/***/ }),
 /* 76 */,
 /* 77 */,
 /* 78 */,
-/* 79 */
+/* 79 */,
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14927,7 +14952,7 @@ var _lodash = __webpack_require__(19);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _dispatcher2 = __webpack_require__(80);
+var _dispatcher2 = __webpack_require__(81);
 
 var _dispatcher3 = _interopRequireDefault(_dispatcher2);
 
@@ -14961,7 +14986,7 @@ const _dispatcher = new _dispatcher3.default({
 process.on('message', msg => _dispatcher.dispatch(msg));
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14985,11 +15010,11 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 var _logger = __webpack_require__(23);
 
-var _transport = __webpack_require__(81);
+var _transport = __webpack_require__(82);
 
 var _transport2 = _interopRequireDefault(_transport);
 
-var _multi_transport = __webpack_require__(82);
+var _multi_transport = __webpack_require__(83);
 
 var _multi_transport2 = _interopRequireDefault(_multi_transport);
 
@@ -15119,7 +15144,7 @@ exports.default = Dispatcher; /**
                                */
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15143,13 +15168,26 @@ var _lodash = __webpack_require__(29);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _crypto = __webpack_require__(8);
+
+var _crypto2 = _interopRequireDefault(_crypto);
+
 var _bceSdkJs = __webpack_require__(24);
 
 var _headers = __webpack_require__(7);
 
 __webpack_require__(74);
 
+var _headers2 = __webpack_require__(75);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * 文件下载模块
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * @file src/uploader/Transport.js
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * @author mudio(job.zhanghao@gmail.com)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
 
 class Transport extends _events.EventEmitter {
     constructor(credentials, config) {
@@ -15208,6 +15246,72 @@ class Transport extends _events.EventEmitter {
         }
     }
 
+    /**
+     * 检查文件一致性
+     *
+     * 1. 非客户端上传的文件只检查文件大小
+     * 2. 客户端上传的文件优先检查`MD5`
+     * 3. 大文件考虑到计算性能的问题，只检查`mtime`
+     *
+     * @returns {boolean}
+     * @memberof Transport
+     */
+    _checkConsistency() {
+        var _this = this;
+
+        return _asyncToGenerator(function* () {
+            let _meta = null;
+            const { mtimeMs, size } = _fs2.default.statSync(_this._localPath);
+
+            try {
+                _meta = yield _this._fetchMetadata();
+            } catch (ex) {
+                if (ex.status_code === 404) {
+                    return false;
+                }
+
+                throw ex;
+            }
+
+            const { xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5 } = _meta;
+
+            if (size === xMetaSize) {
+                if (xMetaFrom === _headers2.TransportOrigin) {
+                    // 如果MD5存在则验证MD5
+                    if (xMetaMD5 && xMetaMD5 !== _this._md5sum) {
+                        return false;
+                    }
+                    // 如果MD5不存在，则验证`mtimeMs`
+                    if (!xMetaMD5 && mtimeMs !== xMetaModifiedTime) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        })();
+    }
+
+    /**
+     * 获取Meta数据
+     *
+     * @param {string} bucketName
+     * @param {string} key
+     * @returns {Promise}
+     * @memberof MultiTransport
+     */
+    _fetchMetadata() {
+        return this._client.getObjectMetadata(this._bucketName, this._objectKey).then(res => {
+            const xMetaSize = +res.http_headers['content-length'];
+            const xMetaMD5 = res.http_headers[_headers2.Meta.xMetaMD5];
+            const xMetaFrom = res.http_headers[_headers2.Meta.xMetaFrom];
+            const xMetaModifiedTime = +res.http_headers[_headers2.Meta.xMetaMTime];
+
+            return { xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5 };
+        });
+    }
+
     _onTimeout() {
         if (this._stream) {
             this._stream.emit('abort');
@@ -15220,42 +15324,48 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     resume() {
-        const options = {};
+        var _this2 = this;
 
-        /**
-         * 读取文件大小
-         */
-        const contentLength = _fs2.default.statSync(this._localPath).size;
+        return _asyncToGenerator(function* () {
+            const options = {};
 
-        /**
-         * 设置`Content-Length`
-         */
-        options[_headers.CONTENT_LENGTH] = contentLength;
-        options[_headers.CONTENT_TYPE] = _bceSdkJs.MimeType.guess(_path2.default.extname(this._localPath));
+            /**
+             * 读取文件大小
+             */
+            const { mtimeMs, size } = _fs2.default.statSync(_this2._localPath);
 
-        /**
-         * 读取流
-         */
-        this._stream = _fs2.default.createReadStream(this._localPath, {
-            start: 0,
-            end: Math.max(0, contentLength - 1)
-        });
+            /**
+             * 设置`Content-Length`
+             */
+            options[_headers.CONTENT_LENGTH] = size;
+            options[_headers.CONTENT_TYPE] = _bceSdkJs.MimeType.guess(_path2.default.extname(_this2._localPath));
+            options[_headers2.Meta.xMetaFrom] = _headers2.TransportOrigin;
+            options[_headers2.Meta.xMetaMTime] = mtimeMs;
+            options[_headers2.Meta.xMetaMD5] = _this2._md5sum;
 
-        /**
-         * 检查超时
-         */
-        const _checkAlive = (0, _lodash2.default)(() => this._onTimeout(), this._timeout);
+            /**
+             * 读取流
+             */
+            _this2._stream = _fs2.default.createReadStream(_this2._localPath);
 
-        /**
-         * 通知进度
-         */
-        this._stream.on('progress', ({ rate, bytesWritten }) => {
-            _checkAlive();
+            /**
+             * 检查超时
+             */
+            const _checkAlive = (0, _lodash2.default)(function () {
+                return _this2._onTimeout();
+            }, _this2._timeout);
 
-            this.emit('progress', { rate, bytesWritten, uuid: this._uuid });
-        });
+            /**
+             * 通知进度
+             */
+            _this2._stream.on('progress', function ({ rate, bytesWritten }) {
+                _checkAlive();
 
-        return this._client.putObject(this._bucketName, this._objectKey, this._stream, options).then(() => this._checkFinish(), err => this._checkError(err));
+                _this2.emit('progress', { rate, bytesWritten, uuid: _this2._uuid });
+            });
+
+            return _this2._client.putObject(_this2._bucketName, _this2._objectKey, _this2._stream, options);
+        })();
     }
 
     /**
@@ -15279,40 +15389,50 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     start() {
-        /**
-         * 重置状态
-         */
-        this._paused = false;
+        var _this3 = this;
 
-        /**
-         * 文件不存在还玩个蛋
-         */
-        const isExist = _fs2.default.existsSync(this._localPath);
-        if (!isExist) {
-            return this._checkError(new Error(`file not found ${this.localPath}`));
-        }
+        return _asyncToGenerator(function* () {
+            /**
+             * 重置状态
+             */
+            _this3._paused = false;
 
-        try {
-            this.emit('start', { uuid: this._uuid });
-            this.resume();
-        } catch (ex) {
-            this._checkError(ex);
-        }
+            /**
+             * 文件不存在还玩个蛋
+             */
+            const isExist = _fs2.default.existsSync(_this3._localPath);
+            if (!isExist) {
+                return _this3._checkError(new Error(`file not found ${_this3.localPath}`));
+            }
+
+            try {
+                const fp = _fs2.default.createReadStream(_this3._localPath);
+                _this3._md5sum = yield _crypto2.default.md5stream(fp);
+
+                // 先检查如果文件已经在bos上了，则忽略
+                if (yield _this3._checkConsistency()) {
+                    return _this3._checkFinish();
+                }
+
+                _this3.emit('start', { uuid: _this3._uuid });
+
+                yield _this3.resume();
+
+                _this3._checkFinish();
+            } catch (ex) {
+                _this3._checkError(ex);
+            }
+        })();
     }
 
     isPaused() {
         return this._paused;
     }
 }
-exports.default = Transport; /**
-                              * 文件下载模块
-                              *
-                              * @file src/uploader/Transport.js
-                              * @author mudio(job.zhanghao@gmail.com)
-                              */
+exports.default = Transport;
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15338,9 +15458,15 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 var _bceSdkJs = __webpack_require__(24);
 
+var _crypto = __webpack_require__(8);
+
+var _crypto2 = _interopRequireDefault(_crypto);
+
 var _headers = __webpack_require__(7);
 
 __webpack_require__(74);
+
+var _headers2 = __webpack_require__(75);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15395,7 +15521,7 @@ class MultiTransport extends _events.EventEmitter {
      * 检查任务是否完成
      *
      * @returns
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     _checkFinish() {
         if (this._paused) {
@@ -15412,7 +15538,7 @@ class MultiTransport extends _events.EventEmitter {
      *
      * @param {Error} err
      * @returns
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     _checkError(err) {
         if (this._paused) {
@@ -15430,6 +15556,72 @@ class MultiTransport extends _events.EventEmitter {
         } else {
             this.emit('error', { uuid: this._uuid, error: '未知错误' });
         }
+    }
+
+    /**
+     * 检查文件一致性
+     *
+     * 1. 非客户端上传的文件只检查文件大小
+     * 2. 客户端上传的文件优先检查`MD5`
+     * 3. 大文件考虑到计算性能的问题，只检查`mtime`
+     *
+     * @returns {boolean}
+     * @memberof Transport
+     */
+    _checkConsistency() {
+        var _this = this;
+
+        return _asyncToGenerator(function* () {
+            let _meta = null;
+            const { mtimeMs, size } = _fs2.default.statSync(_this._localPath);
+
+            try {
+                _meta = yield _this._fetchMetadata();
+            } catch (ex) {
+                if (ex.status_code === 404) {
+                    return false;
+                }
+
+                throw ex;
+            }
+
+            const { xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5 } = _meta;
+
+            if (size === xMetaSize) {
+                if (xMetaFrom === _headers2.TransportOrigin) {
+                    // 如果MD5存在则验证MD5
+                    if (xMetaMD5 && _this._md5sum) {
+                        if (xMetaMD5 !== _this._md5sum) {
+                            return false;
+                        }
+                    } else if (mtimeMs !== xMetaModifiedTime) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        })();
+    }
+
+    /**
+     * 获取Meta数据
+     *
+     * @param {string} bucketName
+     * @param {string} key
+     * @returns {Promise}
+     * @memberof MultiTransport
+     */
+    _fetchMetadata() {
+        return this._client.getObjectMetadata(this._bucketName, this._objectKey).then(res => {
+            const xMetaSize = +res.http_headers['content-length'];
+            const xMetaMD5 = res.http_headers[_headers2.Meta.xMetaMD5];
+            const xMetaFrom = res.http_headers[_headers2.Meta.xMetaFrom];
+            const xMetaModifiedTime = +res.http_headers[_headers2.Meta.xMetaMTime];
+
+            return { xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5 };
+        });
     }
 
     // 最多分片1000片，除了最后一片其他片大小相等且大于等于UploadConfig.PartSize
@@ -15493,22 +15685,29 @@ class MultiTransport extends _events.EventEmitter {
         }, err => done(err));
     }
 
-    _completeUpload({ size }) {
-        return this._fetchParts().then(({ parts }) => {
-            const totalSize = parts.reduce((pre, cur) => pre + cur.size, 0);
+    _completeUpload() {
+        var _this2 = this;
 
-            if (size !== totalSize) {
-                return Promise.reject(new Error('文件签名不一致'));
-            }
+        return _asyncToGenerator(function* () {
+            const { parts } = yield _this2._fetchParts();
+            const { mtimeMs } = _fs2.default.statSync(_this2._localPath);
+            // 排下序
+            const orderedPartList = parts.sort(function (lhs, rhs) {
+                return lhs.partNumber - rhs.partNumber;
+            });
 
-            return this._client.completeMultipartUpload(this._bucketName, this._objectKey, this._uploadId, parts);
-        });
+            yield _this2._client.completeMultipartUpload(_this2._bucketName, _this2._objectKey, _this2._uploadId, orderedPartList, {
+                [_headers2.Meta.xMetaFrom]: _headers2.TransportOrigin,
+                [_headers2.Meta.xMetaMTime]: mtimeMs,
+                [_headers2.Meta.xMetaMD5]: _this2._md5sum
+            });
+        })();
     }
 
     /**
      * 重新下载文件
      *
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     resume(remainParts = []) {
         return new Promise((resolve, reject) => {
@@ -15528,7 +15727,7 @@ class MultiTransport extends _events.EventEmitter {
     /**
      * 暂停下载，必须使用`resume`恢复
      *
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     pause() {
         this._paused = true;
@@ -15543,57 +15742,69 @@ class MultiTransport extends _events.EventEmitter {
     /**
      * 恢复暂停后的下载任务
      *
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     start() {
-        var _this = this;
+        var _this3 = this;
 
         return _asyncToGenerator(function* () {
             /**
              * 重置状态
              */
-            _this._paused = false;
+            _this3._paused = false;
 
             /**
              * 文件不存在还玩个蛋
              */
-            const isExist = _fs2.default.existsSync(_this._localPath);
+            const isExist = _fs2.default.existsSync(_this3._localPath);
             if (!isExist) {
-                return _this._checkError(new Error(`file not found ${_this.localPath}`));
+                return _this3._checkError(new Error(`file not found ${_this3.localPath}`));
             }
 
             try {
-                const totalSize = _fs2.default.statSync(_this._localPath).size;
+                const { size } = _fs2.default.statSync(_this3._localPath);
+
+                // 如果文件小于4G,则算下md5
+                if (size < 4 * 1024 * 1024 * 1024) {
+                    const fp = _fs2.default.createReadStream(_this3._localPath);
+                    _this3._md5sum = yield _crypto2.default.md5stream(fp);
+                }
+
+                // 先检查如果文件已经在bos上了，则忽略
+                if (yield _this3._checkConsistency()) {
+                    return _this3._checkFinish();
+                }
+
                 // 如果文件大于阈值并且没有uploadId，则获取一次
-                if (!_this._uploadId) {
-                    const { uploadId } = yield _this._initUploadId();
-                    _this._uploadId = uploadId;
+                if (!_this3._uploadId) {
+                    const { uploadId } = yield _this3._initUploadId();
+                    _this3._uploadId = uploadId;
                 }
                 // 获取已上传到分片
-                const { parts, maxParts } = yield _this._fetchParts();
+                const { parts, maxParts } = yield _this3._fetchParts();
                 // 重新分片
                 const orderedParts = parts.sort(function (lhs, rhs) {
                     return lhs.partNumber - rhs.partNumber;
                 });
-                _this._uploadedSize = parts.reduce(function (pre, cur) {
+                _this3._uploadedSize = parts.reduce(function (pre, cur) {
                     return pre + cur.size;
                 }, 0);
-                const remainParts = _this._decompose(orderedParts, maxParts, _this._uploadedSize, totalSize);
+                const remainParts = _this3._decompose(orderedParts, maxParts, _this3._uploadedSize, size);
                 // 上传遗留的分片
                 if (remainParts.length > 0) {
-                    _this.emit('start', {
-                        uuid: _this._uuid,
-                        uploadId: _this._uploadId,
-                        localPath: _this._localPath
+                    _this3.emit('start', {
+                        uuid: _this3._uuid,
+                        uploadId: _this3._uploadId,
+                        localPath: _this3._localPath
                     });
-                    yield _this.resume(remainParts);
+                    yield _this3.resume(remainParts);
                 }
                 // 完成任务,用文件大小来效验文件一致性
-                yield _this._completeUpload({ size: totalSize });
+                yield _this3._completeUpload();
                 // 检查任务完成状态
-                _this._checkFinish();
+                _this3._checkFinish();
             } catch (ex) {
-                _this._checkError(ex);
+                _this3._checkError(ex);
             }
         })();
     }

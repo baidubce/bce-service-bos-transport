@@ -10,9 +10,11 @@ import queue from 'async/queue';
 import {EventEmitter} from 'events';
 import debounce from 'lodash.debounce';
 import {BosClient} from 'bce-sdk-js';
+import crypto from 'bce-sdk-js/src/crypto';
 import {CONTENT_LENGTH, CONTENT_TYPE} from 'bce-sdk-js/src/headers';
 
 import '../fake_client';
+import {TransportOrigin, Meta} from '../headers';
 
 const kPartSize = 20 * 1024 * 1024;
 
@@ -59,7 +61,7 @@ export default class MultiTransport extends EventEmitter {
      * 检查任务是否完成
      *
      * @returns
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     _checkFinish() {
         if (this._paused) {
@@ -76,7 +78,7 @@ export default class MultiTransport extends EventEmitter {
      *
      * @param {Error} err
      * @returns
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     _checkError(err) {
         if (this._paused) {
@@ -94,6 +96,68 @@ export default class MultiTransport extends EventEmitter {
         } else {
             this.emit('error', {uuid: this._uuid, error: '未知错误'});
         }
+    }
+
+    /**
+     * 检查文件一致性
+     *
+     * 1. 非客户端上传的文件只检查文件大小
+     * 2. 客户端上传的文件优先检查`MD5`
+     * 3. 大文件考虑到计算性能的问题，只检查`mtime`
+     *
+     * @returns {boolean}
+     * @memberof Transport
+     */
+    async _checkConsistency() {
+        let _meta = null;
+        const {mtimeMs, size} = fs.statSync(this._localPath);
+
+        try {
+            _meta = await this._fetchMetadata();
+        } catch (ex) {
+            if (ex.status_code === 404) {
+                return false;
+            }
+
+            throw ex;
+        }
+
+        const {xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5} = _meta;
+
+        if (size === xMetaSize) {
+            if (xMetaFrom === TransportOrigin) {
+                // 如果MD5存在则验证MD5
+                if (xMetaMD5 && this._md5sum) {
+                    if (xMetaMD5 !== this._md5sum) {
+                        return false;
+                    }
+                } else if (mtimeMs !== xMetaModifiedTime) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 获取Meta数据
+     *
+     * @param {string} bucketName
+     * @param {string} key
+     * @returns {Promise}
+     * @memberof MultiTransport
+     */
+    _fetchMetadata() {
+        return this._client.getObjectMetadata(this._bucketName, this._objectKey).then((res) => {
+            const xMetaSize = +res.http_headers['content-length'];
+            const xMetaMD5 = res.http_headers[Meta.xMetaMD5];
+            const xMetaFrom = res.http_headers[Meta.xMetaFrom];
+            const xMetaModifiedTime = +res.http_headers[Meta.xMetaMTime];
+
+            return {xMetaSize, xMetaFrom, xMetaModifiedTime, xMetaMD5};
+        });
     }
 
     // 最多分片1000片，除了最后一片其他片大小相等且大于等于UploadConfig.PartSize
@@ -162,24 +226,26 @@ export default class MultiTransport extends EventEmitter {
         );
     }
 
-    _completeUpload({size}) {
-        return this._fetchParts().then(({parts}) => {
-            const totalSize = parts.reduce((pre, cur) => pre + cur.size, 0);
+    async _completeUpload() {
+        const {parts} = await this._fetchParts();
+        const {mtimeMs} = fs.statSync(this._localPath);
+        // 排下序
+        const orderedPartList = parts.sort((lhs, rhs) => lhs.partNumber - rhs.partNumber);
 
-            if (size !== totalSize) {
-                return Promise.reject(new Error('文件签名不一致'));
-            }
-
-            return this._client.completeMultipartUpload(
-                this._bucketName, this._objectKey, this._uploadId, parts,
-            );
-        });
+        await this._client.completeMultipartUpload(
+            this._bucketName, this._objectKey, this._uploadId, orderedPartList,
+            {
+                [Meta.xMetaFrom]: TransportOrigin,
+                [Meta.xMetaMTime]: mtimeMs,
+                [Meta.xMetaMD5]: this._md5sum,
+            },
+        );
     }
 
     /**
      * 重新下载文件
      *
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     resume(remainParts = []) {
         return new Promise((resolve, reject) => {
@@ -199,7 +265,7 @@ export default class MultiTransport extends EventEmitter {
     /**
      * 暂停下载，必须使用`resume`恢复
      *
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     pause() {
         this._paused = true;
@@ -214,7 +280,7 @@ export default class MultiTransport extends EventEmitter {
     /**
      * 恢复暂停后的下载任务
      *
-     * @memberof Transport
+     * @memberof MultiTransport
      */
     async start() {
         /**
@@ -231,7 +297,19 @@ export default class MultiTransport extends EventEmitter {
         }
 
         try {
-            const totalSize = fs.statSync(this._localPath).size;
+            const {size} = fs.statSync(this._localPath);
+
+            // 如果文件小于4G,则算下md5
+            if (size < 4 * 1024 * 1024 * 1024) {
+                const fp = fs.createReadStream(this._localPath);
+                this._md5sum = await crypto.md5stream(fp);
+            }
+
+            // 先检查如果文件已经在bos上了，则忽略
+            if (await this._checkConsistency()) {
+                return this._checkFinish();
+            }
+
             // 如果文件大于阈值并且没有uploadId，则获取一次
             if (!this._uploadId) {
                 const {uploadId} = await this._initUploadId();
@@ -242,7 +320,7 @@ export default class MultiTransport extends EventEmitter {
             // 重新分片
             const orderedParts = parts.sort((lhs, rhs) => lhs.partNumber - rhs.partNumber);
             this._uploadedSize = parts.reduce((pre, cur) => pre + cur.size, 0);
-            const remainParts = this._decompose(orderedParts, maxParts, this._uploadedSize, totalSize);
+            const remainParts = this._decompose(orderedParts, maxParts, this._uploadedSize, size);
             // 上传遗留的分片
             if (remainParts.length > 0) {
                 this.emit('start', {
@@ -253,7 +331,7 @@ export default class MultiTransport extends EventEmitter {
                 await this.resume(remainParts);
             }
             // 完成任务,用文件大小来效验文件一致性
-            await this._completeUpload({size: totalSize});
+            await this._completeUpload();
             // 检查任务完成状态
             this._checkFinish();
         } catch (ex) {

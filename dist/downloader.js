@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 75);
+/******/ 	return __webpack_require__(__webpack_require__.s = 76);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1654,8 +1654,8 @@ var Q = __webpack_require__(4);
 var u = __webpack_require__(1);
 
 var config = __webpack_require__(50);
-var Auth = __webpack_require__(10);
-var HttpClient = __webpack_require__(8);
+var Auth = __webpack_require__(11);
+var HttpClient = __webpack_require__(9);
 var H = __webpack_require__(7);
 
 /**
@@ -3935,6 +3935,94 @@ exports.ACCEPT = 'accept';
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  *
+ * @file src/crypto.js
+ * @author leeight
+ */
+
+/* eslint-env node */
+
+var fs = __webpack_require__(3);
+var crypto = __webpack_require__(15);
+
+var Q = __webpack_require__(4);
+
+exports.md5sum = function (data, enc, digest) {
+    if (!Buffer.isBuffer(data)) {
+        data = new Buffer(data, enc || 'UTF-8');
+    }
+
+    var md5 = crypto.createHash('md5');
+    md5.update(data);
+
+    return md5.digest(digest || 'base64');
+};
+
+exports.md5stream = function (stream, digest) {
+    var deferred = Q.defer();
+
+    var md5 = crypto.createHash('md5');
+    stream.on('data', function (chunk) {
+        md5.update(chunk);
+    });
+    stream.on('end', function () {
+        deferred.resolve(md5.digest(digest || 'base64'));
+    });
+    stream.on('error', function (error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
+};
+
+exports.md5file = function (filename, digest) {
+    return exports.md5stream(fs.createReadStream(filename), digest);
+};
+
+exports.md5blob = function (blob, digest) {
+    var deferred = Q.defer();
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(blob);
+    reader.onerror = function (e) {
+        deferred.reject(reader.error);
+    };
+    reader.onloadend = function (e) {
+        if (e.target.readyState === FileReader.DONE) {
+            var content = e.target.result;
+            var md5 = exports.md5sum(content, null, digest);
+            deferred.resolve(md5);
+        }
+    };
+    return deferred.promise;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
  * @file src/http_client.js
  * @author leeight
  */
@@ -4337,7 +4425,7 @@ module.exports = HttpClient;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4568,7 +4656,7 @@ function getTasks(data, uploadId, bucket, object, size, partSize) {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4739,94 +4827,6 @@ module.exports = Auth;
 
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- *
- * @file src/crypto.js
- * @author leeight
- */
-
-/* eslint-env node */
-
-var fs = __webpack_require__(3);
-var crypto = __webpack_require__(15);
-
-var Q = __webpack_require__(4);
-
-exports.md5sum = function (data, enc, digest) {
-    if (!Buffer.isBuffer(data)) {
-        data = new Buffer(data, enc || 'UTF-8');
-    }
-
-    var md5 = crypto.createHash('md5');
-    md5.update(data);
-
-    return md5.digest(digest || 'base64');
-};
-
-exports.md5stream = function (stream, digest) {
-    var deferred = Q.defer();
-
-    var md5 = crypto.createHash('md5');
-    stream.on('data', function (chunk) {
-        md5.update(chunk);
-    });
-    stream.on('end', function () {
-        deferred.resolve(md5.digest(digest || 'base64'));
-    });
-    stream.on('error', function (error) {
-        deferred.reject(error);
-    });
-
-    return deferred.promise;
-};
-
-exports.md5file = function (filename, digest) {
-    return exports.md5stream(fs.createReadStream(filename), digest);
-};
-
-exports.md5blob = function (blob, digest) {
-    var deferred = Q.defer();
-
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(blob);
-    reader.onerror = function (e) {
-        deferred.reject(reader.error);
-    };
-    reader.onloadend = function (e) {
-        if (e.target.readyState === FileReader.DONE) {
-            var content = e.target.result;
-            var md5 = exports.md5sum(content, null, digest);
-            deferred.resolve(md5);
-        }
-    };
-    return deferred.promise;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-/***/ }),
 /* 12 */
 /***/ (function(module, exports) {
 
@@ -4883,9 +4883,9 @@ var Q = __webpack_require__(4);
 
 var H = __webpack_require__(7);
 var strings = __webpack_require__(26);
-var Auth = __webpack_require__(10);
-var crypto = __webpack_require__(11);
-var HttpClient = __webpack_require__(8);
+var Auth = __webpack_require__(11);
+var crypto = __webpack_require__(8);
+var HttpClient = __webpack_require__(9);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
 var WMStream = __webpack_require__(51);
@@ -7065,7 +7065,7 @@ const error = exports.error = msg => logger('error', msg);
  */
 
 exports.Q = __webpack_require__(4);
-exports.Auth = __webpack_require__(10);
+exports.Auth = __webpack_require__(11);
 exports.BosClient = __webpack_require__(16);
 exports.BcsClient = __webpack_require__(53);
 exports.BccClient = __webpack_require__(54);
@@ -7076,7 +7076,7 @@ exports.MctClient = __webpack_require__(58);
 exports.FaceClient = __webpack_require__(59);
 exports.OCRClient = __webpack_require__(60);
 exports.MediaClient = __webpack_require__(61);
-exports.HttpClient = __webpack_require__(8);
+exports.HttpClient = __webpack_require__(9);
 exports.MimeType = __webpack_require__(18);
 exports.STS = __webpack_require__(62);
 exports.VodClient = __webpack_require__(63);
@@ -7366,7 +7366,7 @@ var u = __webpack_require__(1);
 var debug = __webpack_require__(5)('bce-sdk:VodClient.Statistic');
 
 var BceBaseClient = __webpack_require__(2);
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 
 /**
  * 音视频统计接口
@@ -9437,7 +9437,7 @@ var fs = __webpack_require__(3);
 var u = __webpack_require__(1);
 
 var H = __webpack_require__(7);
-var HttpClient = __webpack_require__(8);
+var HttpClient = __webpack_require__(9);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
 
@@ -9586,7 +9586,7 @@ BcsClient.prototype.putObjectFromBlob = function (bucketName, key, blob, options
 BcsClient.prototype.putObjectFromString = function (bucketName, key, data, options) {
     var headers = {};
     headers[H.CONTENT_LENGTH] = Buffer.byteLength(data);
-    headers[H.CONTENT_MD5] = __webpack_require__(11).md5sum(data, null, 'hex');
+    headers[H.CONTENT_MD5] = __webpack_require__(8).md5sum(data, null, 'hex');
     options = u.extend(headers, options);
 
     return this.putObject(bucketName, key, data, options);
@@ -9607,7 +9607,7 @@ BcsClient.prototype.putObjectFromFile = function (bucketName, key, filename, opt
     var fp = fs.createReadStream(filename);
     if (!u.has(options, H.CONTENT_MD5)) {
         var me = this;
-        return __webpack_require__(11).md5file(filename, 'hex')
+        return __webpack_require__(8).md5file(filename, 'hex')
             .then(function (md5sum) {
                 options[H.CONTENT_MD5] = md5sum;
                 return me.putObject(bucketName, key, fp, options);
@@ -11572,8 +11572,8 @@ var util = __webpack_require__(0);
 
 var u = __webpack_require__(1);
 
-var Auth = __webpack_require__(10);
-var HttpClient = __webpack_require__(8);
+var Auth = __webpack_require__(11);
+var HttpClient = __webpack_require__(9);
 var BceBaseClient = __webpack_require__(2);
 
 /**
@@ -11890,7 +11890,7 @@ var url = __webpack_require__(12);
 
 var BceBaseClient = __webpack_require__(2);
 var BosClient = __webpack_require__(16);
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Media = __webpack_require__(65);
 var Notification = __webpack_require__(66);
 var Player = __webpack_require__(67);
@@ -13291,7 +13291,7 @@ var debug = __webpack_require__(5)('bce-sdk:VodClient.Media');
 var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Statistic = __webpack_require__(27);
 
 /**
@@ -13663,7 +13663,7 @@ var u = __webpack_require__(1);
 var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 
 
 /**
@@ -13993,8 +13993,8 @@ var debug = __webpack_require__(5)('bce-sdk:Document');
 
 var BosClient = __webpack_require__(16);
 var BceBaseClient = __webpack_require__(2);
-var UploadHelper = __webpack_require__(9);
-var crypto = __webpack_require__(11);
+var UploadHelper = __webpack_require__(10);
+var crypto = __webpack_require__(8);
 
 var DATA_TYPE_FILE     = 1;
 var DATA_TYPE_BUFFER   = 2;
@@ -14843,7 +14843,8 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 /***/ }),
 /* 73 */,
 /* 74 */,
-/* 75 */
+/* 75 */,
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14853,7 +14854,7 @@ var _lodash = __webpack_require__(19);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _dispatcher2 = __webpack_require__(76);
+var _dispatcher2 = __webpack_require__(77);
 
 var _dispatcher3 = _interopRequireDefault(_dispatcher2);
 
@@ -14887,7 +14888,7 @@ const _dispatcher = new _dispatcher3.default({
 process.on('message', msg => _dispatcher.dispatch(msg));
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14911,7 +14912,7 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 var _logger = __webpack_require__(23);
 
-var _transport = __webpack_require__(77);
+var _transport = __webpack_require__(78);
 
 var _transport2 = _interopRequireDefault(_transport);
 
@@ -15019,7 +15020,7 @@ class Dispatcher {
 exports.default = Dispatcher;
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15041,7 +15042,7 @@ var _util = __webpack_require__(0);
 
 var _util2 = _interopRequireDefault(_util);
 
-var _mkdirp = __webpack_require__(78);
+var _mkdirp = __webpack_require__(79);
 
 var _mkdirp2 = _interopRequireDefault(_mkdirp);
 
@@ -15271,7 +15272,7 @@ class Transport extends _events.EventEmitter {
 exports.default = Transport;
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var path = __webpack_require__(6);

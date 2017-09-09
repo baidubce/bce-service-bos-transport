@@ -15277,7 +15277,7 @@ class Transport extends _events.EventEmitter {
 
         return _asyncToGenerator(function* () {
             let _meta = null;
-            const { mtimeMs, size } = _fs2.default.statSync(_this2._localPath);
+            const { mtime, size } = _fs2.default.statSync(_this2._localPath);
 
             try {
                 _meta = yield _this2._fetchMetadata();
@@ -15301,7 +15301,7 @@ class Transport extends _events.EventEmitter {
                         }
                     }
                     // 如果MD5不存在，则验证`mtimeMs`
-                    if (!xMetaMD5 && mtimeMs !== xMetaModifiedTime) {
+                    if (!xMetaMD5 && mtime.getTime() !== xMetaModifiedTime) {
                         return false;
                     }
                 }
@@ -15351,7 +15351,7 @@ class Transport extends _events.EventEmitter {
             /**
              * 读取文件大小
              */
-            const { mtimeMs, size } = _fs2.default.statSync(_this3._localPath);
+            const { mtime, size } = _fs2.default.statSync(_this3._localPath);
             const md5sum = yield _this3._computedFileMD5();
 
             /**
@@ -15360,7 +15360,7 @@ class Transport extends _events.EventEmitter {
             options[_headers.CONTENT_LENGTH] = size;
             options[_headers.CONTENT_TYPE] = _bceSdkJs.MimeType.guess(_path2.default.extname(_this3._localPath));
             options[_headers2.Meta.xMetaFrom] = _headers2.TransportOrigin;
-            options[_headers2.Meta.xMetaMTime] = mtimeMs;
+            options[_headers2.Meta.xMetaMTime] = mtime.getTime();
             options[_headers2.Meta.xMetaMD5] = md5sum;
 
             /**
@@ -15606,7 +15606,7 @@ class MultiTransport extends _events.EventEmitter {
 
         return _asyncToGenerator(function* () {
             let _meta = null;
-            const { mtimeMs, size } = _fs2.default.statSync(_this2._localPath);
+            const { mtime, size } = _fs2.default.statSync(_this2._localPath);
 
             try {
                 _meta = yield _this2._fetchMetadata();
@@ -15629,7 +15629,7 @@ class MultiTransport extends _events.EventEmitter {
                         if (xMetaMD5 !== md5sum) {
                             return false;
                         }
-                    } else if (mtimeMs !== xMetaModifiedTime) {
+                    } else if (mtime.getTime() !== xMetaModifiedTime) {
                         return false;
                     }
                 }
@@ -15725,7 +15725,7 @@ class MultiTransport extends _events.EventEmitter {
 
         return _asyncToGenerator(function* () {
             const { parts } = yield _this3._fetchParts();
-            const { mtimeMs } = _fs2.default.statSync(_this3._localPath);
+            const { mtime } = _fs2.default.statSync(_this3._localPath);
             // 排下序
             const orderedPartList = parts.sort(function (lhs, rhs) {
                 return lhs.partNumber - rhs.partNumber;
@@ -15734,7 +15734,7 @@ class MultiTransport extends _events.EventEmitter {
 
             yield _this3._client.completeMultipartUpload(_this3._bucketName, _this3._objectKey, _this3._uploadId, orderedPartList, {
                 [_headers2.Meta.xMetaFrom]: _headers2.TransportOrigin,
-                [_headers2.Meta.xMetaMTime]: mtimeMs,
+                [_headers2.Meta.xMetaMTime]: mtime.getTime(),
                 [_headers2.Meta.xMetaMD5]: md5sum
             });
         })();

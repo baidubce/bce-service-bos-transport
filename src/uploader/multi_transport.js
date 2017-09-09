@@ -122,7 +122,7 @@ export default class MultiTransport extends EventEmitter {
      */
     async _checkConsistency() {
         let _meta = null;
-        const {mtimeMs, size} = fs.statSync(this._localPath);
+        const {mtime, size} = fs.statSync(this._localPath);
 
         try {
             _meta = await this._fetchMetadata();
@@ -145,7 +145,7 @@ export default class MultiTransport extends EventEmitter {
                     if (xMetaMD5 !== md5sum) {
                         return false;
                     }
-                } else if (mtimeMs !== xMetaModifiedTime) {
+                } else if (mtime.getTime() !== xMetaModifiedTime) {
                     return false;
                 }
             }
@@ -242,7 +242,7 @@ export default class MultiTransport extends EventEmitter {
 
     async _completeUpload() {
         const {parts} = await this._fetchParts();
-        const {mtimeMs} = fs.statSync(this._localPath);
+        const {mtime} = fs.statSync(this._localPath);
         // 排下序
         const orderedPartList = parts.sort((lhs, rhs) => lhs.partNumber - rhs.partNumber);
         const md5sum = await this._computedFileMD5();
@@ -251,7 +251,7 @@ export default class MultiTransport extends EventEmitter {
             this._bucketName, this._objectKey, this._uploadId, orderedPartList,
             {
                 [Meta.xMetaFrom]: TransportOrigin,
-                [Meta.xMetaMTime]: mtimeMs,
+                [Meta.xMetaMTime]: mtime.getTime(),
                 [Meta.xMetaMD5]: md5sum,
             },
         );

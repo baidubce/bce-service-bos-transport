@@ -97,7 +97,7 @@ export default class Transport extends EventEmitter {
      */
     async _checkConsistency() {
         let _meta = null;
-        const {mtimeMs, size} = fs.statSync(this._localPath);
+        const {mtime, size} = fs.statSync(this._localPath);
 
         try {
             _meta = await this._fetchMetadata();
@@ -121,7 +121,7 @@ export default class Transport extends EventEmitter {
                     }
                 }
                 // 如果MD5不存在，则验证`mtimeMs`
-                if (!xMetaMD5 && mtimeMs !== xMetaModifiedTime) {
+                if (!xMetaMD5 && mtime.getTime() !== xMetaModifiedTime) {
                     return false;
                 }
             }
@@ -167,7 +167,7 @@ export default class Transport extends EventEmitter {
         /**
          * 读取文件大小
          */
-        const {mtimeMs, size} = fs.statSync(this._localPath);
+        const {mtime, size} = fs.statSync(this._localPath);
         const md5sum = await this._computedFileMD5();
 
         /**
@@ -176,7 +176,7 @@ export default class Transport extends EventEmitter {
         options[CONTENT_LENGTH] = size;
         options[CONTENT_TYPE] = MimeType.guess(path.extname(this._localPath));
         options[Meta.xMetaFrom] = TransportOrigin;
-        options[Meta.xMetaMTime] = mtimeMs;
+        options[Meta.xMetaMTime] = mtime.getTime();
         options[Meta.xMetaMD5] = md5sum;
 
         /**

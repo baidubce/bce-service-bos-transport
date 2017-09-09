@@ -3,7 +3,7 @@
 import Transport from '../src/uploader/transport';
 import MultiTransport from '../src/uploader/multi_transport';
 
-const _transport = new MultiTransport(
+const _transport = new Transport(
     {
         endpoint: 'http://bos.qasandbox.bcetest.baidu.com',
         credentials: {
@@ -14,8 +14,8 @@ const _transport = new MultiTransport(
     {
         uuid: 'test_uuid',
         bucketName: 'bce-bos-client',
-        objectKey: '40',
-        localPath: '/Users/mudio/Desktop/tmp/40mb',
+        objectKey: '40111',
+        localPath: '/Users/mudio/Desktop/tmp/10m',
     },
 );
 

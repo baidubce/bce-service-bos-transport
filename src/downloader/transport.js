@@ -14,6 +14,8 @@ import {BosClient} from 'bce-sdk-js';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 
+import {Meta} from '../headers';
+
 export default class Transport extends EventEmitter {
     constructor(credentials, config) {
         super();
@@ -33,13 +35,20 @@ export default class Transport extends EventEmitter {
     /**
      * 获取Meta数据
      *
-     * @param {string} bucketName
-     * @param {string} key
      * @returns {Promise}
-     * @memberof Transport
+     * @memberof MultiTransport
      */
-    _fetchMetadata(bucketName, key) {
-        return this._client.getObjectMetadata(bucketName, key);
+    _fetchMetadata() {
+        return this._client.getObjectMetadata(this._bucketName, this._objectKey).then((res) => {
+            const xMetaSize = +res.http_headers['content-length'];
+            const lastModified = new Date(res.http_headers['last-modified']);
+            const xMetaMD5 = res.http_headers[Meta.xMetaMD5];
+            const xMetaOrigin = res.http_headers[Meta.xMetaOrigin];
+
+            const xMetaModifiedTime = lastModified.getTime();
+
+            return {xMetaSize, xMetaOrigin, xMetaModifiedTime, xMetaMD5};
+        });
     }
 
     /**
@@ -195,21 +204,21 @@ export default class Transport extends EventEmitter {
         /**
          * 没有办法比对本地与BOS上文件是否一致，只能检查文件大小了
          */
-        const begin = fs.statSync(this._localPath).size;
-        this._fetchMetadata(this._bucketName, this._objectKey).then(
-            ({http_headers}) => {
-                const totalSize = http_headers['content-length'];
+        const {size, mtime} = fs.statSync(this._localPath);
+        this._fetchMetadata().then(
+            (res) => {
+                const {xMetaSize, xMetaModifiedTime} = res;
 
-                if (begin > totalSize) {
+                if (size > xMetaSize || mtime.getTime() >= xMetaModifiedTime) {
                     /**
                      * 文件不一致，重新下载
                      */
                     return this.resume();
-                } else if (begin < totalSize) {
+                } else if (size < xMetaSize) {
                     /**
                      * 文件续传
                      */
-                    return this.resume(begin, totalSize);
+                    return this.resume(size, xMetaSize);
                 }
 
                 /**

@@ -1,21 +1,20 @@
 
 
-import Transport from '../src/uploader/transport';
+import SingleTransport from '../src/uploader/single_transport';
 import MultiTransport from '../src/uploader/multi_transport';
 
-const _transport = new Transport(
+const {ENDPOINT, AK, SK} = process.env;
+
+const _transport = new MultiTransport(
     {
-        endpoint: 'http://bos.qasandbox.bcetest.baidu.com',
-        credentials: {
-            ak: 'fdd8f61810764eed9bcd6cc1e2296006',
-            sk: '479e1f33e5514dd3981fedb8ee9f67e4',
-        },
+        endpoint: ENDPOINT,
+        credentials: {ak: AK, sk: SK},
     },
     {
         uuid: 'test_uuid',
         bucketName: 'bce-bos-client',
-        objectKey: '40111',
-        localPath: '/Users/mudio/Desktop/tmp/10m',
+        objectKey: '100m',
+        localPath: '/Users/mudio/Desktop/tmp/100m',
     },
 );
 

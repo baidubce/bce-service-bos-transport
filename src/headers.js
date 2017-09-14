@@ -6,8 +6,7 @@
  */
 
 export const Meta = {
-    xMetaFrom: 'x-bce-meta-from',
-    xMetaMTime: 'x-bce-meta-mtime',
+    xMetaOrigin: 'x-bce-meta-origin',
     xMetaMD5: 'x-bce-meta-md5',
 };
 

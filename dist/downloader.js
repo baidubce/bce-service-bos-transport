@@ -1648,14 +1648,14 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscor
 /* eslint-env node */
 
 var util = __webpack_require__(0);
-var EventEmitter = __webpack_require__(13).EventEmitter;
+var EventEmitter = __webpack_require__(14).EventEmitter;
 
 var Q = __webpack_require__(4);
 var u = __webpack_require__(1);
 
-var config = __webpack_require__(50);
+var config = __webpack_require__(49);
 var Auth = __webpack_require__(11);
-var HttpClient = __webpack_require__(9);
+var HttpClient = __webpack_require__(8);
 var H = __webpack_require__(7);
 
 /**
@@ -3839,9 +3839,9 @@ return Q;
  */
 
 if (typeof process !== 'undefined' && process.type === 'renderer') {
-  module.exports = __webpack_require__(42);
+  module.exports = __webpack_require__(41);
 } else {
-  module.exports = __webpack_require__(44);
+  module.exports = __webpack_require__(43);
 }
 
 
@@ -3935,94 +3935,6 @@ exports.ACCEPT = 'accept';
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  *
- * @file src/crypto.js
- * @author leeight
- */
-
-/* eslint-env node */
-
-var fs = __webpack_require__(3);
-var crypto = __webpack_require__(15);
-
-var Q = __webpack_require__(4);
-
-exports.md5sum = function (data, enc, digest) {
-    if (!Buffer.isBuffer(data)) {
-        data = new Buffer(data, enc || 'UTF-8');
-    }
-
-    var md5 = crypto.createHash('md5');
-    md5.update(data);
-
-    return md5.digest(digest || 'base64');
-};
-
-exports.md5stream = function (stream, digest) {
-    var deferred = Q.defer();
-
-    var md5 = crypto.createHash('md5');
-    stream.on('data', function (chunk) {
-        md5.update(chunk);
-    });
-    stream.on('end', function () {
-        deferred.resolve(md5.digest(digest || 'base64'));
-    });
-    stream.on('error', function (error) {
-        deferred.reject(error);
-    });
-
-    return deferred.promise;
-};
-
-exports.md5file = function (filename, digest) {
-    return exports.md5stream(fs.createReadStream(filename), digest);
-};
-
-exports.md5blob = function (blob, digest) {
-    var deferred = Q.defer();
-
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(blob);
-    reader.onerror = function (e) {
-        deferred.reject(reader.error);
-    };
-    reader.onloadend = function (e) {
-        if (e.target.readyState === FileReader.DONE) {
-            var content = e.target.result;
-            var md5 = exports.md5sum(content, null, digest);
-            deferred.resolve(md5);
-        }
-    };
-    return deferred.promise;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- *
  * @file src/http_client.js
  * @author leeight
  */
@@ -4031,11 +3943,11 @@ exports.md5blob = function (blob, digest) {
 /* eslint max-params:[0,10] */
 /* globals ArrayBuffer */
 
-var http = __webpack_require__(47);
-var https = __webpack_require__(48);
+var http = __webpack_require__(46);
+var https = __webpack_require__(47);
 var util = __webpack_require__(0);
-var stream = __webpack_require__(14);
-var EventEmitter = __webpack_require__(13).EventEmitter;
+var stream = __webpack_require__(13);
+var EventEmitter = __webpack_require__(14).EventEmitter;
 
 var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
@@ -4094,7 +4006,7 @@ HttpClient.prototype.sendRequest = function (httpMethod, path, body, headers, pa
         defaultHeaders[H.USER_AGENT] = navigator.userAgent;
     }
     else {
-        defaultHeaders[H.USER_AGENT] = util.format('bce-sdk-nodejs/%s/%s/%s', __webpack_require__(49).version,
+        defaultHeaders[H.USER_AGENT] = util.format('bce-sdk-nodejs/%s/%s/%s', __webpack_require__(48).version,
             process.platform, process.version);
     }
     defaultHeaders[H.X_BCE_DATE] = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
@@ -4425,7 +4337,7 @@ module.exports = HttpClient;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4444,9 +4356,9 @@ module.exports = HttpClient;
  * @author leeight
  */
 var fs = __webpack_require__(3);
-var stream = __webpack_require__(14);
+var stream = __webpack_require__(13);
 
-var async = __webpack_require__(64);
+var async = __webpack_require__(63);
 var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 var debug = __webpack_require__(5)('bce-sdk:helper');
@@ -4656,6 +4568,94 @@ function getTasks(data, uploadId, bucket, object, size, partSize) {
 
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * @file src/crypto.js
+ * @author leeight
+ */
+
+/* eslint-env node */
+
+var fs = __webpack_require__(3);
+var crypto = __webpack_require__(15);
+
+var Q = __webpack_require__(4);
+
+exports.md5sum = function (data, enc, digest) {
+    if (!Buffer.isBuffer(data)) {
+        data = new Buffer(data, enc || 'UTF-8');
+    }
+
+    var md5 = crypto.createHash('md5');
+    md5.update(data);
+
+    return md5.digest(digest || 'base64');
+};
+
+exports.md5stream = function (stream, digest) {
+    var deferred = Q.defer();
+
+    var md5 = crypto.createHash('md5');
+    stream.on('data', function (chunk) {
+        md5.update(chunk);
+    });
+    stream.on('end', function () {
+        deferred.resolve(md5.digest(digest || 'base64'));
+    });
+    stream.on('error', function (error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
+};
+
+exports.md5file = function (filename, digest) {
+    return exports.md5stream(fs.createReadStream(filename), digest);
+};
+
+exports.md5blob = function (blob, digest) {
+    var deferred = Q.defer();
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(blob);
+    reader.onerror = function (e) {
+        deferred.reject(reader.error);
+    };
+    reader.onloadend = function (e) {
+        if (e.target.readyState === FileReader.DONE) {
+            var content = e.target.result;
+            var md5 = exports.md5sum(content, null, digest);
+            deferred.resolve(md5);
+        }
+    };
+    return deferred.promise;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/***/ }),
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4684,7 +4684,7 @@ var u = __webpack_require__(1);
 var debug = __webpack_require__(5)('bce-sdk:auth');
 
 var H = __webpack_require__(7);
-var strings = __webpack_require__(26);
+var strings = __webpack_require__(25);
 
 /**
  * Auth
@@ -4836,13 +4836,13 @@ module.exports = require("url");
 /* 13 */
 /***/ (function(module, exports) {
 
-module.exports = require("events");
+module.exports = require("stream");
 
 /***/ }),
 /* 14 */
 /***/ (function(module, exports) {
 
-module.exports = require("stream");
+module.exports = require("events");
 
 /***/ }),
 /* 15 */
@@ -4882,14 +4882,14 @@ var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 
 var H = __webpack_require__(7);
-var strings = __webpack_require__(26);
+var strings = __webpack_require__(25);
 var Auth = __webpack_require__(11);
-var crypto = __webpack_require__(8);
-var HttpClient = __webpack_require__(9);
+var crypto = __webpack_require__(10);
+var HttpClient = __webpack_require__(8);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
-var WMStream = __webpack_require__(51);
-var Multipart = __webpack_require__(52);
+var WMStream = __webpack_require__(50);
+var Multipart = __webpack_require__(51);
 
 // var MIN_PART_SIZE = 1048576;                // 1M
 // var THREAD = 2;
@@ -6999,7 +6999,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.isAsync = undefined;
 
-var _asyncify = __webpack_require__(39);
+var _asyncify = __webpack_require__(38);
 
 var _asyncify2 = _interopRequireDefault(_asyncify);
 
@@ -7048,55 +7048,6 @@ const error = exports.error = msg => logger('error', msg);
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- *
- * @file index.js
- * @author leeight
- */
-
-exports.Q = __webpack_require__(4);
-exports.Auth = __webpack_require__(11);
-exports.BosClient = __webpack_require__(16);
-exports.BcsClient = __webpack_require__(53);
-exports.BccClient = __webpack_require__(54);
-exports.SesClient = __webpack_require__(55);
-exports.QnsClient = __webpack_require__(56);
-exports.LssClient = __webpack_require__(57);
-exports.MctClient = __webpack_require__(58);
-exports.FaceClient = __webpack_require__(59);
-exports.OCRClient = __webpack_require__(60);
-exports.MediaClient = __webpack_require__(61);
-exports.HttpClient = __webpack_require__(9);
-exports.MimeType = __webpack_require__(18);
-exports.STS = __webpack_require__(62);
-exports.VodClient = __webpack_require__(63);
-exports.DocClient = __webpack_require__(70);
-
-
-
-
-
-
-
-
-
-
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -7110,7 +7061,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(43);
+exports.humanize = __webpack_require__(42);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -7302,7 +7253,7 @@ function coerce(val) {
 
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports) {
 
 /**
@@ -7349,7 +7300,7 @@ exports.trim = function (string) {
 
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -7366,7 +7317,7 @@ var u = __webpack_require__(1);
 var debug = __webpack_require__(5)('bce-sdk:VodClient.Statistic');
 
 var BceBaseClient = __webpack_require__(2);
-var helper = __webpack_require__(10);
+var helper = __webpack_require__(9);
 
 /**
  * 音视频统计接口
@@ -7426,7 +7377,7 @@ module.exports = Statistic;
 
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7443,7 +7394,7 @@ exports.default = function (worker, concurrency) {
   }, concurrency, 1);
 };
 
-var _queue = __webpack_require__(30);
+var _queue = __webpack_require__(29);
 
 var _queue2 = _interopRequireDefault(_queue);
 
@@ -7562,390 +7513,56 @@ module.exports = exports['default'];
  */
 
 /***/ }),
-/* 29 */
-/***/ (function(module, exports) {
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
 
 /**
- * lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright jQuery Foundation and other contributors <https://jquery.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * @file index.js
+ * @author leeight
  */
 
-/** Used as the `TypeError` message for "Functions" methods. */
-var FUNC_ERROR_TEXT = 'Expected a function';
+exports.Q = __webpack_require__(4);
+exports.Auth = __webpack_require__(11);
+exports.BosClient = __webpack_require__(16);
+exports.BcsClient = __webpack_require__(52);
+exports.BccClient = __webpack_require__(53);
+exports.SesClient = __webpack_require__(54);
+exports.QnsClient = __webpack_require__(55);
+exports.LssClient = __webpack_require__(56);
+exports.MctClient = __webpack_require__(57);
+exports.FaceClient = __webpack_require__(58);
+exports.OCRClient = __webpack_require__(59);
+exports.MediaClient = __webpack_require__(60);
+exports.HttpClient = __webpack_require__(8);
+exports.MimeType = __webpack_require__(18);
+exports.STS = __webpack_require__(61);
+exports.VodClient = __webpack_require__(62);
+exports.DocClient = __webpack_require__(69);
 
-/** Used as references for various `Number` constants. */
-var NAN = 0 / 0;
 
-/** `Object#toString` result references. */
-var symbolTag = '[object Symbol]';
 
-/** Used to match leading and trailing whitespace. */
-var reTrim = /^\s+|\s+$/g;
 
-/** Used to detect bad signed hexadecimal string values. */
-var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
 
-/** Used to detect binary string values. */
-var reIsBinary = /^0b[01]+$/i;
 
-/** Used to detect octal string values. */
-var reIsOctal = /^0o[0-7]+$/i;
 
-/** Built-in method references without a dependency on `root`. */
-var freeParseInt = parseInt;
 
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
 
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
-/** Used as a reference to the global object. */
-var root = freeGlobal || freeSelf || Function('return this')();
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max,
-    nativeMin = Math.min;
-
-/**
- * Gets the timestamp of the number of milliseconds that have elapsed since
- * the Unix epoch (1 January 1970 00:00:00 UTC).
- *
- * @static
- * @memberOf _
- * @since 2.4.0
- * @category Date
- * @returns {number} Returns the timestamp.
- * @example
- *
- * _.defer(function(stamp) {
- *   console.log(_.now() - stamp);
- * }, _.now());
- * // => Logs the number of milliseconds it took for the deferred invocation.
- */
-var now = function() {
-  return root.Date.now();
-};
-
-/**
- * Creates a debounced function that delays invoking `func` until after `wait`
- * milliseconds have elapsed since the last time the debounced function was
- * invoked. The debounced function comes with a `cancel` method to cancel
- * delayed `func` invocations and a `flush` method to immediately invoke them.
- * Provide `options` to indicate whether `func` should be invoked on the
- * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
- * with the last arguments provided to the debounced function. Subsequent
- * calls to the debounced function return the result of the last `func`
- * invocation.
- *
- * **Note:** If `leading` and `trailing` options are `true`, `func` is
- * invoked on the trailing edge of the timeout only if the debounced function
- * is invoked more than once during the `wait` timeout.
- *
- * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
- * until to the next tick, similar to `setTimeout` with a timeout of `0`.
- *
- * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
- * for details over the differences between `_.debounce` and `_.throttle`.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Function
- * @param {Function} func The function to debounce.
- * @param {number} [wait=0] The number of milliseconds to delay.
- * @param {Object} [options={}] The options object.
- * @param {boolean} [options.leading=false]
- *  Specify invoking on the leading edge of the timeout.
- * @param {number} [options.maxWait]
- *  The maximum time `func` is allowed to be delayed before it's invoked.
- * @param {boolean} [options.trailing=true]
- *  Specify invoking on the trailing edge of the timeout.
- * @returns {Function} Returns the new debounced function.
- * @example
- *
- * // Avoid costly calculations while the window size is in flux.
- * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
- *
- * // Invoke `sendMail` when clicked, debouncing subsequent calls.
- * jQuery(element).on('click', _.debounce(sendMail, 300, {
- *   'leading': true,
- *   'trailing': false
- * }));
- *
- * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
- * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
- * var source = new EventSource('/stream');
- * jQuery(source).on('message', debounced);
- *
- * // Cancel the trailing debounced invocation.
- * jQuery(window).on('popstate', debounced.cancel);
- */
-function debounce(func, wait, options) {
-  var lastArgs,
-      lastThis,
-      maxWait,
-      result,
-      timerId,
-      lastCallTime,
-      lastInvokeTime = 0,
-      leading = false,
-      maxing = false,
-      trailing = true;
-
-  if (typeof func != 'function') {
-    throw new TypeError(FUNC_ERROR_TEXT);
-  }
-  wait = toNumber(wait) || 0;
-  if (isObject(options)) {
-    leading = !!options.leading;
-    maxing = 'maxWait' in options;
-    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
-    trailing = 'trailing' in options ? !!options.trailing : trailing;
-  }
-
-  function invokeFunc(time) {
-    var args = lastArgs,
-        thisArg = lastThis;
-
-    lastArgs = lastThis = undefined;
-    lastInvokeTime = time;
-    result = func.apply(thisArg, args);
-    return result;
-  }
-
-  function leadingEdge(time) {
-    // Reset any `maxWait` timer.
-    lastInvokeTime = time;
-    // Start the timer for the trailing edge.
-    timerId = setTimeout(timerExpired, wait);
-    // Invoke the leading edge.
-    return leading ? invokeFunc(time) : result;
-  }
-
-  function remainingWait(time) {
-    var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime,
-        result = wait - timeSinceLastCall;
-
-    return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
-  }
-
-  function shouldInvoke(time) {
-    var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime;
-
-    // Either this is the first call, activity has stopped and we're at the
-    // trailing edge, the system time has gone backwards and we're treating
-    // it as the trailing edge, or we've hit the `maxWait` limit.
-    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
-      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
-  }
-
-  function timerExpired() {
-    var time = now();
-    if (shouldInvoke(time)) {
-      return trailingEdge(time);
-    }
-    // Restart the timer.
-    timerId = setTimeout(timerExpired, remainingWait(time));
-  }
-
-  function trailingEdge(time) {
-    timerId = undefined;
-
-    // Only invoke if we have `lastArgs` which means `func` has been
-    // debounced at least once.
-    if (trailing && lastArgs) {
-      return invokeFunc(time);
-    }
-    lastArgs = lastThis = undefined;
-    return result;
-  }
-
-  function cancel() {
-    if (timerId !== undefined) {
-      clearTimeout(timerId);
-    }
-    lastInvokeTime = 0;
-    lastArgs = lastCallTime = lastThis = timerId = undefined;
-  }
-
-  function flush() {
-    return timerId === undefined ? result : trailingEdge(now());
-  }
-
-  function debounced() {
-    var time = now(),
-        isInvoking = shouldInvoke(time);
-
-    lastArgs = arguments;
-    lastThis = this;
-    lastCallTime = time;
-
-    if (isInvoking) {
-      if (timerId === undefined) {
-        return leadingEdge(lastCallTime);
-      }
-      if (maxing) {
-        // Handle invocations in a tight loop.
-        timerId = setTimeout(timerExpired, wait);
-        return invokeFunc(lastCallTime);
-      }
-    }
-    if (timerId === undefined) {
-      timerId = setTimeout(timerExpired, wait);
-    }
-    return result;
-  }
-  debounced.cancel = cancel;
-  debounced.flush = flush;
-  return debounced;
-}
-
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/**
- * Checks if `value` is classified as a `Symbol` primitive or object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
- */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && objectToString.call(value) == symbolTag);
-}
-
-/**
- * Converts `value` to a number.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to process.
- * @returns {number} Returns the number.
- * @example
- *
- * _.toNumber(3.2);
- * // => 3.2
- *
- * _.toNumber(Number.MIN_VALUE);
- * // => 5e-324
- *
- * _.toNumber(Infinity);
- * // => Infinity
- *
- * _.toNumber('3.2');
- * // => 3.2
- */
-function toNumber(value) {
-  if (typeof value == 'number') {
-    return value;
-  }
-  if (isSymbol(value)) {
-    return NAN;
-  }
-  if (isObject(value)) {
-    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-    value = isObject(other) ? (other + '') : other;
-  }
-  if (typeof value != 'string') {
-    return value === 0 ? value : +value;
-  }
-  value = value.replace(reTrim, '');
-  var isBinary = reIsBinary.test(value);
-  return (isBinary || reIsOctal.test(value))
-    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
-    : (reIsBadHex.test(value) ? NAN : +value);
-}
-
-module.exports = debounce;
 
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7956,19 +7573,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = queue;
 
-var _baseIndexOf = __webpack_require__(31);
+var _baseIndexOf = __webpack_require__(30);
 
 var _baseIndexOf2 = _interopRequireDefault(_baseIndexOf);
 
-var _isArray = __webpack_require__(35);
+var _isArray = __webpack_require__(34);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
-var _noop = __webpack_require__(36);
+var _noop = __webpack_require__(35);
 
 var _noop2 = _interopRequireDefault(_noop);
 
-var _onlyOnce = __webpack_require__(37);
+var _onlyOnce = __webpack_require__(36);
 
 var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
 
@@ -7976,7 +7593,7 @@ var _setImmediate = __webpack_require__(20);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
-var _DoublyLinkedList = __webpack_require__(38);
+var _DoublyLinkedList = __webpack_require__(37);
 
 var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
 
@@ -8145,12 +7762,12 @@ function queue(worker, concurrency, payload) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseFindIndex = __webpack_require__(32),
-    baseIsNaN = __webpack_require__(33),
-    strictIndexOf = __webpack_require__(34);
+var baseFindIndex = __webpack_require__(31),
+    baseIsNaN = __webpack_require__(32),
+    strictIndexOf = __webpack_require__(33);
 
 /**
  * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
@@ -8171,7 +7788,7 @@ module.exports = baseIndexOf;
 
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports) {
 
 /**
@@ -8201,7 +7818,7 @@ module.exports = baseFindIndex;
 
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports) {
 
 /**
@@ -8219,7 +7836,7 @@ module.exports = baseIsNaN;
 
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports) {
 
 /**
@@ -8248,7 +7865,7 @@ module.exports = strictIndexOf;
 
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports) {
 
 /**
@@ -8280,7 +7897,7 @@ module.exports = isArray;
 
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports) {
 
 /**
@@ -8303,7 +7920,7 @@ module.exports = noop;
 
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8324,7 +7941,7 @@ function onlyOnce(fn) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8418,7 +8035,7 @@ DLL.prototype.remove = function (testFn) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8429,11 +8046,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = asyncify;
 
-var _isObject = __webpack_require__(40);
+var _isObject = __webpack_require__(39);
 
 var _isObject2 = _interopRequireDefault(_isObject);
 
-var _initialParams = __webpack_require__(41);
+var _initialParams = __webpack_require__(40);
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
@@ -8534,7 +8151,7 @@ function rethrow(error) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports) {
 
 /**
@@ -8571,7 +8188,7 @@ module.exports = isObject;
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8598,7 +8215,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 module.exports = exports['default'];
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -8607,7 +8224,7 @@ module.exports = exports['default'];
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(25);
+exports = module.exports = __webpack_require__(24);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -8789,7 +8406,7 @@ function localstorage() {
 
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports) {
 
 /**
@@ -8947,14 +8564,14 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var tty = __webpack_require__(45);
+var tty = __webpack_require__(44);
 var util = __webpack_require__(0);
 
 /**
@@ -8963,7 +8580,7 @@ var util = __webpack_require__(0);
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(25);
+exports = module.exports = __webpack_require__(24);
 exports.init = init;
 exports.log = log;
 exports.formatArgs = formatArgs;
@@ -9140,7 +8757,7 @@ function createWritableStdioStream (fd) {
 
     case 'PIPE':
     case 'TCP':
-      var net = __webpack_require__(46);
+      var net = __webpack_require__(45);
       stream = new net.Socket({
         fd: fd,
         readable: false,
@@ -9199,37 +8816,37 @@ exports.enable(load());
 
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("tty");
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports) {
 
 module.exports = require("https");
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports) {
 
 module.exports = {"_from":"bce-sdk-js@^0.2.7","_id":"bce-sdk-js@0.2.7","_inBundle":false,"_integrity":"sha1-mICM4DH9iCkDihx8IK0xfAKk+PM=","_location":"/bce-sdk-js","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"bce-sdk-js@^0.2.7","name":"bce-sdk-js","escapedName":"bce-sdk-js","rawSpec":"^0.2.7","saveSpec":null,"fetchSpec":"^0.2.7"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/bce-sdk-js/-/bce-sdk-js-0.2.7.tgz","_shasum":"98808ce031fd8829038a1c7c20ad317c02a4f8f3","_spec":"bce-sdk-js@^0.2.7","_where":"/Users/mudio/Desktop/client/bce-service-bos-transport","author":{"name":"leeight@gmail.com"},"bugs":{"url":"https://github.com/baidubce/bce-sdk-js/issues"},"bundleDependencies":false,"dependencies":{"async":"^1.5.2","debug":"^2.2.0","q":"^1.1.2","underscore":"^1.7.0"},"deprecated":false,"description":"Baidu Cloud Engine JavaScript SDK","devDependencies":{"browserify":"10.2.6","coveralls":"^2.11.8","expect.js":"^0.3.1","istanbul":"^0.4.2","mocha":"^2.4.5"},"directories":{"test":"test"},"homepage":"https://github.com/baidubce/bce-sdk-js#readme","license":"MIT","main":"index.js","name":"bce-sdk-js","repository":{"type":"git","url":"git+https://github.com/baidubce/bce-sdk-js.git"},"scripts":{"fecs":"fecs src","pack":"browserify -s baidubce.sdk index.js -o baidubce-sdk.bundle.js && uglifyjs baidubce-sdk.bundle.js --compress --mangle -o baidubce-sdk.bundle.min.js","test":"./test/run-all.sh"},"version":"0.2.7"}
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports) {
 
 /**
@@ -9269,7 +8886,7 @@ exports.DEFAULT_CONFIG = {
 
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9290,7 +8907,7 @@ exports.DEFAULT_CONFIG = {
 
 /* eslint-env node */
 
-var stream = __webpack_require__(14);
+var stream = __webpack_require__(13);
 var util = __webpack_require__(0);
 
 /**
@@ -9318,7 +8935,7 @@ module.exports = WMStream;
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9407,7 +9024,7 @@ module.exports = Multipart;
 
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9437,7 +9054,7 @@ var fs = __webpack_require__(3);
 var u = __webpack_require__(1);
 
 var H = __webpack_require__(7);
-var HttpClient = __webpack_require__(9);
+var HttpClient = __webpack_require__(8);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
 
@@ -9586,7 +9203,7 @@ BcsClient.prototype.putObjectFromBlob = function (bucketName, key, blob, options
 BcsClient.prototype.putObjectFromString = function (bucketName, key, data, options) {
     var headers = {};
     headers[H.CONTENT_LENGTH] = Buffer.byteLength(data);
-    headers[H.CONTENT_MD5] = __webpack_require__(8).md5sum(data, null, 'hex');
+    headers[H.CONTENT_MD5] = __webpack_require__(10).md5sum(data, null, 'hex');
     options = u.extend(headers, options);
 
     return this.putObject(bucketName, key, data, options);
@@ -9607,7 +9224,7 @@ BcsClient.prototype.putObjectFromFile = function (bucketName, key, filename, opt
     var fp = fs.createReadStream(filename);
     if (!u.has(options, H.CONTENT_MD5)) {
         var me = this;
-        return __webpack_require__(8).md5file(filename, 'hex')
+        return __webpack_require__(10).md5file(filename, 'hex')
             .then(function (md5sum) {
                 options[H.CONTENT_MD5] = md5sum;
                 return me.putObject(bucketName, key, fp, options);
@@ -9762,7 +9379,7 @@ module.exports = BcsClient;
 
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -9988,7 +9605,7 @@ module.exports = BccClient;
 
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10162,7 +9779,7 @@ module.exports = SesClient;
 
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10455,7 +10072,7 @@ exports.Subscription = Subscription;
 
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -10745,7 +10362,7 @@ exports.Notification = Notification;
 
 
 /***/ }),
-/* 58 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11220,7 +10837,7 @@ exports.Preset = Preset;
 
 
 /***/ }),
-/* 59 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11449,7 +11066,7 @@ module.exports = FaceClient;
 
 
 /***/ }),
-/* 60 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11545,7 +11162,7 @@ module.exports = OCRClient;
 
 
 /***/ }),
-/* 61 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11573,7 +11190,7 @@ var util = __webpack_require__(0);
 var u = __webpack_require__(1);
 
 var Auth = __webpack_require__(11);
-var HttpClient = __webpack_require__(9);
+var HttpClient = __webpack_require__(8);
 var BceBaseClient = __webpack_require__(2);
 
 /**
@@ -11785,7 +11402,7 @@ module.exports = MediaClient;
 
 
 /***/ }),
-/* 62 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11861,7 +11478,7 @@ module.exports = STS;
 
 
 /***/ }),
-/* 63 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -11890,13 +11507,13 @@ var url = __webpack_require__(12);
 
 var BceBaseClient = __webpack_require__(2);
 var BosClient = __webpack_require__(16);
-var helper = __webpack_require__(10);
-var Media = __webpack_require__(65);
-var Notification = __webpack_require__(66);
-var Player = __webpack_require__(67);
-var PresetGroup = __webpack_require__(68);
-var Statistic = __webpack_require__(27);
-var StrategyGroup = __webpack_require__(69);
+var helper = __webpack_require__(9);
+var Media = __webpack_require__(64);
+var Notification = __webpack_require__(65);
+var Player = __webpack_require__(66);
+var PresetGroup = __webpack_require__(67);
+var Statistic = __webpack_require__(26);
+var StrategyGroup = __webpack_require__(68);
 
 /**
  * VOD音视频点播服务
@@ -12000,7 +11617,7 @@ module.exports = VodClient;
 
 
 /***/ }),
-/* 64 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -13272,7 +12889,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 
 /***/ }),
-/* 65 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13291,8 +12908,8 @@ var debug = __webpack_require__(5)('bce-sdk:VodClient.Media');
 var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
-var helper = __webpack_require__(10);
-var Statistic = __webpack_require__(27);
+var helper = __webpack_require__(9);
+var Statistic = __webpack_require__(26);
 
 /**
  * 音视频媒资接口
@@ -13540,7 +13157,7 @@ module.exports = Media;
 
 
 /***/ }),
-/* 66 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13644,7 +13261,7 @@ module.exports = Notification;
 
 
 /***/ }),
-/* 67 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13663,7 +13280,7 @@ var u = __webpack_require__(1);
 var BceBaseClient = __webpack_require__(2);
 // var BosClient = require('../bos_client');
 // var H = require('../headers');
-var helper = __webpack_require__(10);
+var helper = __webpack_require__(9);
 
 
 /**
@@ -13757,7 +13374,7 @@ module.exports = Player;
 
 
 /***/ }),
-/* 68 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13871,7 +13488,7 @@ module.exports = PresetGroup;
 
 
 /***/ }),
-/* 69 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13959,7 +13576,7 @@ module.exports = StrategyGroup;
 
 
 /***/ }),
-/* 70 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -13993,8 +13610,8 @@ var debug = __webpack_require__(5)('bce-sdk:Document');
 
 var BosClient = __webpack_require__(16);
 var BceBaseClient = __webpack_require__(2);
-var UploadHelper = __webpack_require__(10);
-var crypto = __webpack_require__(8);
+var UploadHelper = __webpack_require__(9);
+var crypto = __webpack_require__(10);
 
 var DATA_TYPE_FILE     = 1;
 var DATA_TYPE_BUFFER   = 2;
@@ -14370,6 +13987,389 @@ Notification.prototype.removeAll = function () {
 
 exports.Document = Document;
 exports.Notification = Notification;
+
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports) {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/** Used as references for various `Number` constants. */
+var NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Gets the timestamp of the number of milliseconds that have elapsed since
+ * the Unix epoch (1 January 1970 00:00:00 UTC).
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Date
+ * @returns {number} Returns the timestamp.
+ * @example
+ *
+ * _.defer(function(stamp) {
+ *   console.log(_.now() - stamp);
+ * }, _.now());
+ * // => Logs the number of milliseconds it took for the deferred invocation.
+ */
+var now = function() {
+  return root.Date.now();
+};
+
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last time the debounced function was
+ * invoked. The debounced function comes with a `cancel` method to cancel
+ * delayed `func` invocations and a `flush` method to immediately invoke them.
+ * Provide `options` to indicate whether `func` should be invoked on the
+ * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+ * with the last arguments provided to the debounced function. Subsequent
+ * calls to the debounced function return the result of the last `func`
+ * invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is
+ * invoked on the trailing edge of the timeout only if the debounced function
+ * is invoked more than once during the `wait` timeout.
+ *
+ * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+ * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+ *
+ * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+ * for details over the differences between `_.debounce` and `_.throttle`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to debounce.
+ * @param {number} [wait=0] The number of milliseconds to delay.
+ * @param {Object} [options={}] The options object.
+ * @param {boolean} [options.leading=false]
+ *  Specify invoking on the leading edge of the timeout.
+ * @param {number} [options.maxWait]
+ *  The maximum time `func` is allowed to be delayed before it's invoked.
+ * @param {boolean} [options.trailing=true]
+ *  Specify invoking on the trailing edge of the timeout.
+ * @returns {Function} Returns the new debounced function.
+ * @example
+ *
+ * // Avoid costly calculations while the window size is in flux.
+ * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+ *
+ * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+ * jQuery(element).on('click', _.debounce(sendMail, 300, {
+ *   'leading': true,
+ *   'trailing': false
+ * }));
+ *
+ * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+ * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+ * var source = new EventSource('/stream');
+ * jQuery(source).on('message', debounced);
+ *
+ * // Cancel the trailing debounced invocation.
+ * jQuery(window).on('popstate', debounced.cancel);
+ */
+function debounce(func, wait, options) {
+  var lastArgs,
+      lastThis,
+      maxWait,
+      result,
+      timerId,
+      lastCallTime,
+      lastInvokeTime = 0,
+      leading = false,
+      maxing = false,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  wait = toNumber(wait) || 0;
+  if (isObject(options)) {
+    leading = !!options.leading;
+    maxing = 'maxWait' in options;
+    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+    trailing = 'trailing' in options ? !!options.trailing : trailing;
+  }
+
+  function invokeFunc(time) {
+    var args = lastArgs,
+        thisArg = lastThis;
+
+    lastArgs = lastThis = undefined;
+    lastInvokeTime = time;
+    result = func.apply(thisArg, args);
+    return result;
+  }
+
+  function leadingEdge(time) {
+    // Reset any `maxWait` timer.
+    lastInvokeTime = time;
+    // Start the timer for the trailing edge.
+    timerId = setTimeout(timerExpired, wait);
+    // Invoke the leading edge.
+    return leading ? invokeFunc(time) : result;
+  }
+
+  function remainingWait(time) {
+    var timeSinceLastCall = time - lastCallTime,
+        timeSinceLastInvoke = time - lastInvokeTime,
+        result = wait - timeSinceLastCall;
+
+    return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+  }
+
+  function shouldInvoke(time) {
+    var timeSinceLastCall = time - lastCallTime,
+        timeSinceLastInvoke = time - lastInvokeTime;
+
+    // Either this is the first call, activity has stopped and we're at the
+    // trailing edge, the system time has gone backwards and we're treating
+    // it as the trailing edge, or we've hit the `maxWait` limit.
+    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+  }
+
+  function timerExpired() {
+    var time = now();
+    if (shouldInvoke(time)) {
+      return trailingEdge(time);
+    }
+    // Restart the timer.
+    timerId = setTimeout(timerExpired, remainingWait(time));
+  }
+
+  function trailingEdge(time) {
+    timerId = undefined;
+
+    // Only invoke if we have `lastArgs` which means `func` has been
+    // debounced at least once.
+    if (trailing && lastArgs) {
+      return invokeFunc(time);
+    }
+    lastArgs = lastThis = undefined;
+    return result;
+  }
+
+  function cancel() {
+    if (timerId !== undefined) {
+      clearTimeout(timerId);
+    }
+    lastInvokeTime = 0;
+    lastArgs = lastCallTime = lastThis = timerId = undefined;
+  }
+
+  function flush() {
+    return timerId === undefined ? result : trailingEdge(now());
+  }
+
+  function debounced() {
+    var time = now(),
+        isInvoking = shouldInvoke(time);
+
+    lastArgs = arguments;
+    lastThis = this;
+    lastCallTime = time;
+
+    if (isInvoking) {
+      if (timerId === undefined) {
+        return leadingEdge(lastCallTime);
+      }
+      if (maxing) {
+        // Handle invocations in a tight loop.
+        timerId = setTimeout(timerExpired, wait);
+        return invokeFunc(lastCallTime);
+      }
+    }
+    if (timerId === undefined) {
+      timerId = setTimeout(timerExpired, wait);
+    }
+    return result;
+  }
+  debounced.cancel = cancel;
+  debounced.flush = flush;
+  return debounced;
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+module.exports = debounce;
 
 
 /***/ }),
@@ -14828,6 +14828,30 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 /**
+ * Headers
+ *
+ * @file src/headers.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+const Meta = exports.Meta = {
+  xMetaOrigin: 'x-bce-meta-origin',
+  xMetaMD5: 'x-bce-meta-md5'
+};
+
+const TransportOrigin = exports.TransportOrigin = 'bce-client';
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
  * 文件下载通知命令
  *
  * @file src/downloader/dispatcher.js
@@ -14841,7 +14865,6 @@ const NotifyError = exports.NotifyError = 'download_notify_error';
 const NotifyStart = exports.NotifyStart = 'download_notify_start';
 
 /***/ }),
-/* 73 */,
 /* 74 */,
 /* 75 */,
 /* 76 */
@@ -14902,7 +14925,7 @@ var _path = __webpack_require__(6);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _queue = __webpack_require__(28);
+var _queue = __webpack_require__(27);
 
 var _queue2 = _interopRequireDefault(_queue);
 
@@ -14916,7 +14939,7 @@ var _transport = __webpack_require__(78);
 
 var _transport2 = _interopRequireDefault(_transport);
 
-var _command = __webpack_require__(72);
+var _command = __webpack_require__(73);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15046,11 +15069,11 @@ var _mkdirp = __webpack_require__(79);
 
 var _mkdirp2 = _interopRequireDefault(_mkdirp);
 
-var _events = __webpack_require__(13);
+var _events = __webpack_require__(14);
 
-var _bceSdkJs = __webpack_require__(24);
+var _bceSdkJs = __webpack_require__(28);
 
-var _lodash = __webpack_require__(29);
+var _lodash = __webpack_require__(70);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -15058,14 +15081,9 @@ var _lodash3 = __webpack_require__(71);
 
 var _lodash4 = _interopRequireDefault(_lodash3);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _headers = __webpack_require__(72);
 
-/**
- * 文件下载模块
- *
- * @file src/downloader/Transport.js
- * @author mudio(job.zhanghao@gmail.com)
- */
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class Transport extends _events.EventEmitter {
     constructor(credentials, config) {
@@ -15086,13 +15104,20 @@ class Transport extends _events.EventEmitter {
     /**
      * 获取Meta数据
      *
-     * @param {string} bucketName
-     * @param {string} key
      * @returns {Promise}
-     * @memberof Transport
+     * @memberof MultiTransport
      */
-    _fetchMetadata(bucketName, key) {
-        return this._client.getObjectMetadata(bucketName, key);
+    _fetchMetadata() {
+        return this._client.getObjectMetadata(this._bucketName, this._objectKey).then(res => {
+            const xMetaSize = +res.http_headers['content-length'];
+            const lastModified = new Date(res.http_headers['last-modified']);
+            const xMetaMD5 = res.http_headers[_headers.Meta.xMetaMD5];
+            const xMetaOrigin = res.http_headers[_headers.Meta.xMetaOrigin];
+
+            const xMetaModifiedTime = lastModified.getTime();
+
+            return { xMetaSize, xMetaOrigin, xMetaModifiedTime, xMetaMD5 };
+        });
     }
 
     /**
@@ -15242,20 +15267,20 @@ class Transport extends _events.EventEmitter {
         /**
          * 没有办法比对本地与BOS上文件是否一致，只能检查文件大小了
          */
-        const begin = _fs2.default.statSync(this._localPath).size;
-        this._fetchMetadata(this._bucketName, this._objectKey).then(({ http_headers }) => {
-            const totalSize = http_headers['content-length'];
+        const { size, mtime } = _fs2.default.statSync(this._localPath);
+        this._fetchMetadata().then(res => {
+            const { xMetaSize, xMetaModifiedTime } = res;
 
-            if (begin > totalSize) {
+            if (size > xMetaSize || mtime.getTime() >= xMetaModifiedTime) {
                 /**
                  * 文件不一致，重新下载
                  */
                 return this.resume();
-            } else if (begin < totalSize) {
+            } else if (size < xMetaSize) {
                 /**
                  * 文件续传
                  */
-                return this.resume(begin, totalSize);
+                return this.resume(size, xMetaSize);
             }
 
             /**
@@ -15269,7 +15294,12 @@ class Transport extends _events.EventEmitter {
         return this._paused;
     }
 }
-exports.default = Transport;
+exports.default = Transport; /**
+                              * 文件下载模块
+                              *
+                              * @file src/downloader/Transport.js
+                              * @author mudio(job.zhanghao@gmail.com)
+                              */
 
 /***/ }),
 /* 79 */

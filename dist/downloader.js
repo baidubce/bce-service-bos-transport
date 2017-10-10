@@ -8843,7 +8843,7 @@ module.exports = require("https");
 /* 48 */
 /***/ (function(module, exports) {
 
-module.exports = {"_from":"bce-sdk-js@^0.2.7","_id":"bce-sdk-js@0.2.7","_inBundle":false,"_integrity":"sha1-mICM4DH9iCkDihx8IK0xfAKk+PM=","_location":"/bce-sdk-js","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"bce-sdk-js@^0.2.7","name":"bce-sdk-js","escapedName":"bce-sdk-js","rawSpec":"^0.2.7","saveSpec":null,"fetchSpec":"^0.2.7"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/bce-sdk-js/-/bce-sdk-js-0.2.7.tgz","_shasum":"98808ce031fd8829038a1c7c20ad317c02a4f8f3","_spec":"bce-sdk-js@^0.2.7","_where":"/Users/mudio/Desktop/client/bce-service-bos-transport","author":{"name":"leeight@gmail.com"},"bugs":{"url":"https://github.com/baidubce/bce-sdk-js/issues"},"bundleDependencies":false,"dependencies":{"async":"^1.5.2","debug":"^2.2.0","q":"^1.1.2","underscore":"^1.7.0"},"deprecated":false,"description":"Baidu Cloud Engine JavaScript SDK","devDependencies":{"browserify":"10.2.6","coveralls":"^2.11.8","expect.js":"^0.3.1","istanbul":"^0.4.2","mocha":"^2.4.5"},"directories":{"test":"test"},"homepage":"https://github.com/baidubce/bce-sdk-js#readme","license":"MIT","main":"index.js","name":"bce-sdk-js","repository":{"type":"git","url":"git+https://github.com/baidubce/bce-sdk-js.git"},"scripts":{"fecs":"fecs src","pack":"browserify -s baidubce.sdk index.js -o baidubce-sdk.bundle.js && uglifyjs baidubce-sdk.bundle.js --compress --mangle -o baidubce-sdk.bundle.min.js","test":"./test/run-all.sh"},"version":"0.2.7"}
+module.exports = {"_args":[["bce-sdk-js@0.2.7","/Users/mudio/Desktop/client/bce-service-bos-transport"]],"_development":true,"_from":"bce-sdk-js@0.2.7","_id":"bce-sdk-js@0.2.7","_inBundle":false,"_integrity":"sha1-mICM4DH9iCkDihx8IK0xfAKk+PM=","_location":"/bce-sdk-js","_phantomChildren":{"ms":"2.0.0"},"_requested":{"type":"version","registry":true,"raw":"bce-sdk-js@0.2.7","name":"bce-sdk-js","escapedName":"bce-sdk-js","rawSpec":"0.2.7","saveSpec":null,"fetchSpec":"0.2.7"},"_requiredBy":["#DEV:/"],"_resolved":"https://registry.npmjs.org/bce-sdk-js/-/bce-sdk-js-0.2.7.tgz","_spec":"0.2.7","_where":"/Users/mudio/Desktop/client/bce-service-bos-transport","author":{"name":"leeight@gmail.com"},"bugs":{"url":"https://github.com/baidubce/bce-sdk-js/issues"},"dependencies":{"async":"^1.5.2","debug":"^2.2.0","q":"^1.1.2","underscore":"^1.7.0"},"description":"Baidu Cloud Engine JavaScript SDK","devDependencies":{"browserify":"10.2.6","coveralls":"^2.11.8","expect.js":"^0.3.1","istanbul":"^0.4.2","mocha":"^2.4.5"},"directories":{"test":"test"},"homepage":"https://github.com/baidubce/bce-sdk-js#readme","license":"MIT","main":"index.js","name":"bce-sdk-js","repository":{"type":"git","url":"git+https://github.com/baidubce/bce-sdk-js.git"},"scripts":{"fecs":"fecs src","pack":"browserify -s baidubce.sdk index.js -o baidubce-sdk.bundle.js && uglifyjs baidubce-sdk.bundle.js --compress --mangle -o baidubce-sdk.bundle.min.js","test":"./test/run-all.sh"},"version":"0.2.7"}
 
 /***/ }),
 /* 49 */
@@ -15206,6 +15206,15 @@ class Transport extends _events.EventEmitter {
             _notifyProgress(rate, outputStream.bytesWritten + begin);
 
             _checkAlive();
+        });
+
+        /**
+         * 这里主要检查文件是否有可写权限
+         */
+        outputStream.on('error', err => {
+            if (err.code === 'EACCES') {
+                this._checkError(err);
+            }
         });
 
         /**

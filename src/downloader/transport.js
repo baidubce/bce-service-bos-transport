@@ -143,6 +143,15 @@ export default class Transport extends EventEmitter {
         });
 
         /**
+         * 这里主要检查文件是否有可写权限
+         */
+        outputStream.on('error', (err) => {
+            if (err.code === 'EACCES') {
+                this._checkError(err);
+            }
+        });
+
+        /**
          * Promise的状态不可预期
          */
         this._client.sendRequest('GET', {

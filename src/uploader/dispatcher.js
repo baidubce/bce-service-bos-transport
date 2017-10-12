@@ -10,7 +10,7 @@ import queue from 'async/queue';
 import isFunction from 'lodash.isfunction';
 
 import {debug} from '../logger';
-import Transport from './transport';
+import SingleTransport from './single_transport';
 import MultiTransport from './multi_transport';
 
 import {
@@ -108,7 +108,7 @@ export default class Dispatcher {
         const fileSize = fs.statSync(localPath).size;
         if (!this._transportCache[uuid]) {
             // 文件大于20mb则分片上传
-            const _ClassType = fileSize > 20 * 1024 * 1024 ? MultiTransport : Transport;
+            const _ClassType = fileSize > 20 * 1024 * 1024 ? MultiTransport : SingleTransport;
 
             this._transportCache[uuid] = new _ClassType(
                 {endpoint, credentials: this._credentials},

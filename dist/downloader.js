@@ -1656,7 +1656,7 @@ var u = __webpack_require__(1);
 var config = __webpack_require__(51);
 var Auth = __webpack_require__(11);
 var HttpClient = __webpack_require__(8);
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 
 /**
  * BceBaseClient
@@ -3849,12 +3849,6 @@ if (typeof process !== 'undefined' && process.type === 'renderer') {
 /* 6 */
 /***/ (function(module, exports) {
 
-module.exports = require("path");
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
 /**
  * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
  *
@@ -3920,6 +3914,12 @@ exports.ACCEPT = 'accept';
 
 
 /***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3953,7 +3953,7 @@ var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 var debug = __webpack_require__(5)('bce-sdk:HttpClient');
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 
 /**
  * The HttpClient
@@ -4683,7 +4683,7 @@ var u = __webpack_require__(1);
 
 var debug = __webpack_require__(5)('bce-sdk:auth');
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 var strings = __webpack_require__(26);
 
 /**
@@ -4874,14 +4874,14 @@ module.exports = require("crypto");
 /* eslint max-params:[0,10] */
 
 var util = __webpack_require__(0);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var fs = __webpack_require__(3);
 var qs = __webpack_require__(17);
 
 var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 var strings = __webpack_require__(26);
 var Auth = __webpack_require__(11);
 var crypto = __webpack_require__(10);
@@ -6838,6 +6838,32 @@ exports.guess = function (ext) {
 
 /***/ }),
 /* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * azeroth - 日志记录器
+ *
+ * @file logger.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+function logger(type, message, ...args) {
+  process.send({ category: 'log', message: { type, message, pid: process.pid } }, ...args);
+}
+
+const info = exports.info = (msg, ...args) => logger('info', msg, ...args);
+const warn = exports.warn = (msg, ...args) => logger('warn', msg, ...args);
+const debug = exports.debug = (msg, ...args) => logger('debug', msg, ...args);
+const error = exports.error = (msg, ...args) => logger('error', msg, ...args);
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports) {
 
 /**
@@ -6918,7 +6944,7 @@ module.exports = isFunction;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6931,7 +6957,7 @@ exports.hasNextTick = exports.hasSetImmediate = undefined;
 exports.fallback = fallback;
 exports.wrap = wrap;
 
-var _slice = __webpack_require__(21);
+var _slice = __webpack_require__(22);
 
 var _slice2 = _interopRequireDefault(_slice);
 
@@ -6966,7 +6992,7 @@ if (hasSetImmediate) {
 exports.default = wrap(_defer);
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6988,7 +7014,7 @@ function slice(arrayLike, start) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7017,32 +7043,6 @@ function wrapAsync(asyncFn) {
 
 exports.default = wrapAsync;
 exports.isAsync = isAsync;
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * azeroth - 日志记录器
- *
- * @file logger.js
- * @author mudio(job.zhanghao@gmail.com)
- */
-
-function logger(type, message) {
-  process.send({ category: 'log', message: { type, message } });
-}
-
-const debug = exports.debug = msg => logger('debug', msg);
-const info = exports.info = msg => logger('info', msg);
-const warn = exports.warn = msg => logger('warn', msg);
-const error = exports.error = msg => logger('error', msg);
 
 /***/ }),
 /* 24 */
@@ -7433,6 +7433,38 @@ module.exports = Statistic;
 
 
 Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+/**
+ * Headers
+ *
+ * @file src/headers.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+const Meta = exports.Meta = {
+    xMetaOrigin: 'x-bce-meta-origin',
+    xMetaMD5: 'x-bce-meta-md5'
+};
+
+const TransportOrigin = exports.TransportOrigin = 'bce-client';
+
+const TransportStatus = exports.TransportStatus = {
+    UnStarted: 'UnStarted',
+    Running: 'Running',
+    Paused: 'Paused',
+    Finished: 'Finished',
+    Error: 'Error'
+};
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
@@ -7447,7 +7479,7 @@ var _queue = __webpack_require__(31);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _wrapAsync = __webpack_require__(22);
+var _wrapAsync = __webpack_require__(23);
 
 var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
@@ -7562,7 +7594,7 @@ module.exports = exports['default'];
  */
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports) {
 
 /**
@@ -7945,30 +7977,6 @@ module.exports = debounce;
 
 
 /***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * Headers
- *
- * @file src/headers.js
- * @author mudio(job.zhanghao@gmail.com)
- */
-
-const Meta = exports.Meta = {
-  xMetaOrigin: 'x-bce-meta-origin',
-  xMetaMD5: 'x-bce-meta-md5'
-};
-
-const TransportOrigin = exports.TransportOrigin = 'bce-client';
-
-/***/ }),
 /* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -7996,7 +8004,7 @@ var _onlyOnce = __webpack_require__(38);
 
 var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
 
-var _setImmediate = __webpack_require__(20);
+var _setImmediate = __webpack_require__(21);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
@@ -8004,7 +8012,7 @@ var _DoublyLinkedList = __webpack_require__(39);
 
 var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
 
-var _wrapAsync = __webpack_require__(22);
+var _wrapAsync = __webpack_require__(23);
 
 var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
@@ -8461,7 +8469,7 @@ var _initialParams = __webpack_require__(42);
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
-var _setImmediate = __webpack_require__(20);
+var _setImmediate = __webpack_require__(21);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
@@ -8613,7 +8621,7 @@ exports.default = function (fn) {
     };
 };
 
-var _slice = __webpack_require__(21);
+var _slice = __webpack_require__(22);
 
 var _slice2 = _interopRequireDefault(_slice);
 
@@ -9455,12 +9463,12 @@ module.exports = Multipart;
 
 var crypto = __webpack_require__(15);
 var util = __webpack_require__(0);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var fs = __webpack_require__(3);
 
 var u = __webpack_require__(1);
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 var HttpClient = __webpack_require__(8);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
@@ -10034,7 +10042,7 @@ module.exports = BccClient;
 /* eslint-env node */
 /* eslint max-params:[0,10] */
 var fs = __webpack_require__(3);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var util = __webpack_require__(0);
 
 var BceBaseClient = __webpack_require__(2);
@@ -14007,7 +14015,7 @@ module.exports = StrategyGroup;
 /* eslint fecs-camelcase:[2,{"ignore":["/opt_/"]}] */
 
 var fs = __webpack_require__(3);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var util = __webpack_require__(0);
 var builtinUrl = __webpack_require__(12);
 
@@ -14873,7 +14881,7 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 "use strict";
 
 
-var _lodash = __webpack_require__(19);
+var _lodash = __webpack_require__(20);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -14881,7 +14889,7 @@ var _dispatcher2 = __webpack_require__(77);
 
 var _dispatcher3 = _interopRequireDefault(_dispatcher2);
 
-var _logger = __webpack_require__(23);
+var _logger = __webpack_require__(19);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14900,8 +14908,7 @@ if (!(0, _lodash2.default)(process.send)) {
 const { BCE_AK, BCE_SK } = process.env;
 
 if (!BCE_AK || !BCE_SK) {
-    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK` env.');
-    process.exit();
+    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK` env.', () => process.exit());
 }
 
 const _dispatcher = new _dispatcher3.default({
@@ -14909,6 +14916,8 @@ const _dispatcher = new _dispatcher3.default({
 });
 
 process.on('message', msg => _dispatcher.dispatch(msg));
+process.on('unhandledRejection', err => (0, _logger.error)(`UnhandledRejection => ${err.message} \n ${err.stack}`));
+process.on('uncaughtException', err => (0, _logger.error)(`UncaughtException => ${err}`, () => process.exit()));
 
 /***/ }),
 /* 77 */
@@ -14921,19 +14930,15 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _path = __webpack_require__(6);
-
-var _path2 = _interopRequireDefault(_path);
-
-var _queue = __webpack_require__(28);
+var _queue = __webpack_require__(29);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _lodash = __webpack_require__(19);
+var _lodash = __webpack_require__(20);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _logger = __webpack_require__(23);
+var _logger = __webpack_require__(19);
 
 var _transport = __webpack_require__(78);
 
@@ -14942,13 +14947,6 @@ var _transport2 = _interopRequireDefault(_transport);
 var _command = __webpack_require__(73);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * 文件下载模块
- *
- * @file src/downloader/dispatcher.js
- * @author mudio(job.zhanghao@gmail.com)
- */
 
 class Dispatcher {
     constructor(credentials) {
@@ -14959,18 +14957,24 @@ class Dispatcher {
     }
 
     _invoke(transport, done) {
+        if (!transport.isUnStarted()) {
+            transport.removeAllListeners();
+        }
+
         transport.on('rate', msg => this._send(_command.NotifyProgress, msg));
 
         transport.on('pause', msg => {
             this._send(_command.NotifyPaused, msg);
             done();
         });
+
         transport.on('finish', msg => {
             this._send(_command.NotifyFinished, msg);
             // 如果已经完成的任务，则清理掉资源
             delete this._transportCache[msg.uuid];
             done();
         });
+
         transport.on('error', msg => {
             this._send(_command.NotifyError, msg);
             done();
@@ -14997,7 +15001,6 @@ class Dispatcher {
 
     addItem(config = {}, endpoint) {
         const uuid = config.uuid;
-
         if (uuid) {
             if (!this._transportCache[uuid]) {
                 this._transportCache[uuid] = new _transport2.default({ endpoint, credentials: this._credentials }, config);
@@ -15005,16 +15008,6 @@ class Dispatcher {
 
             this.resumeItem({ uuid });
         }
-    }
-
-    addPatch({ uuid, bucketName, prefix, objectKeys = [], localPath, totalSize }) {
-        objectKeys.forEach(item => this.addItem({
-            uuid,
-            bucketName,
-            totalSize,
-            objectKey: _path2.default.posix.join(prefix, item),
-            localPath: _path2.default.join(localPath, item)
-        }));
     }
 
     pauseItem({ uuid }) {
@@ -15025,22 +15018,30 @@ class Dispatcher {
         }
     }
 
-    pauseAll() {
-        this._queue.remove(item => {
-            item.data.pause();
-            return true;
-        });
+    resumeItem({ uuid }) {
+        if (!this._transportCache[uuid].isRunning()) {
+            return this._queue.unshift(this._transportCache[uuid]);
+        }
+
+        (0, _logger.error)(`Task has running => ${uuid}`);
     }
 
-    resumeItem({ uuid }) {
-        if (uuid in this._transportCache) {
-            if (this._transportCache[uuid].isPaused()) {
-                this._queue.unshift(this._transportCache[uuid]);
-            }
+    removeItem({ uuid }) {
+        const task = this._transportCache[uuid];
+
+        if (task && task.isRunning()) {
+            task.pause();
         }
+
+        delete this._transportCache[uuid];
     }
 }
-exports.default = Dispatcher;
+exports.default = Dispatcher; /**
+                               * 文件下载模块
+                               *
+                               * @file src/downloader/dispatcher.js
+                               * @author mudio(job.zhanghao@gmail.com)
+                               */
 
 /***/ }),
 /* 78 */
@@ -15057,7 +15058,7 @@ var _fs = __webpack_require__(3);
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _path = __webpack_require__(6);
+var _path = __webpack_require__(7);
 
 var _path2 = _interopRequireDefault(_path);
 
@@ -15073,7 +15074,7 @@ var _events = __webpack_require__(14);
 
 var _bceSdkJs = __webpack_require__(24);
 
-var _lodash = __webpack_require__(29);
+var _lodash = __webpack_require__(30);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -15081,7 +15082,7 @@ var _lodash3 = __webpack_require__(72);
 
 var _lodash4 = _interopRequireDefault(_lodash3);
 
-var _headers = __webpack_require__(30);
+var _headers = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15089,6 +15090,7 @@ class Transport extends _events.EventEmitter {
     constructor(credentials, config) {
         super();
 
+        this._checkAlive = (0, _lodash2.default)(() => this._onTimeout(), 10e3);
         const { uuid, bucketName, objectKey, localPath } = config;
 
         this._uuid = uuid;
@@ -15097,8 +15099,7 @@ class Transport extends _events.EventEmitter {
         this._bucketName = bucketName;
         this._client = new _bceSdkJs.BosClient(credentials);
 
-        this._timeout = 10e3; // 10s
-        this._paused = true;
+        this._state = _headers.TransportStatus.UnStarted;
     }
 
     /**
@@ -15127,11 +15128,11 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     _checkFinish() {
-        if (this._paused) {
-            return this.emit('pause', { uuid: this._uuid });
+        if (!this.isRunning()) {
+            return;
         }
 
-        this._paused = true;
+        this._state = _headers.TransportStatus.Finished;
 
         this.emit('finish', { uuid: this._uuid, objectKey: this._objectKey });
     }
@@ -15144,11 +15145,11 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     _checkError(err) {
-        if (this._paused) {
-            return this.emit('pause', { uuid: this._uuid });
+        if (!this.isRunning()) {
+            return;
         }
 
-        this._paused = true;
+        this._state = _headers.TransportStatus.Error;
 
         if (typeof err === 'string') {
             this.emit('error', { uuid: this._uuid, error: err });
@@ -15162,11 +15163,16 @@ class Transport extends _events.EventEmitter {
     }
 
     _onTimeout() {
-        if (this._outputStream) {
-            this._outputStream.emit('error', new Error('网络连接超时'));
+        if (this._outputStream && this.isRunning()) {
+            this._checkError(new Error('网络连接超时'));
             this._outputStream.end();
         }
     }
+
+    /**
+     * 保证`WriteStream`一定可以被close掉
+     */
+
 
     /**
      * 重新下载文件
@@ -15179,11 +15185,6 @@ class Transport extends _events.EventEmitter {
          */
         this._outputStream = _fs2.default.createWriteStream(this._localPath, { flags: begin ? 'a' : 'w' });
         const outputStream = this._outputStream;
-
-        /**
-         * 保证`WriteStream`一定可以被close掉
-         */
-        const _checkAlive = (0, _lodash2.default)(() => this._onTimeout(), this._timeout);
 
         /**
          * 通知节流
@@ -15205,7 +15206,7 @@ class Transport extends _events.EventEmitter {
 
             _notifyProgress(rate, outputStream.bytesWritten + begin);
 
-            _checkAlive();
+            this._checkAlive();
         });
 
         /**
@@ -15236,7 +15237,7 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     pause() {
-        this._paused = true;
+        this._state = _headers.TransportStatus.Paused;
 
         if (this._outputStream) {
             this._outputStream.end();
@@ -15254,7 +15255,7 @@ class Transport extends _events.EventEmitter {
         /**
          * 重置状态
          */
-        this._paused = false;
+        this._state = _headers.TransportStatus.Running;
 
         /**
          * 文件不存在则重新开始
@@ -15279,8 +15280,7 @@ class Transport extends _events.EventEmitter {
         const { size, mtime } = _fs2.default.statSync(this._localPath);
         this._fetchMetadata().then(res => {
             const { xMetaSize, xMetaModifiedTime } = res;
-
-            if (size > xMetaSize || mtime.getTime() >= xMetaModifiedTime) {
+            if (size >= xMetaSize || mtime.getTime() <= xMetaModifiedTime) {
                 /**
                  * 文件不一致，重新下载
                  */
@@ -15299,8 +15299,12 @@ class Transport extends _events.EventEmitter {
         }, err => this._checkError(err));
     }
 
-    isPaused() {
-        return this._paused;
+    isRunning() {
+        return this._state === _headers.TransportStatus.Running;
+    }
+
+    isUnStarted() {
+        return this._state === _headers.TransportStatus.UnStarted;
     }
 }
 exports.default = Transport; /**
@@ -15314,7 +15318,7 @@ exports.default = Transport; /**
 /* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var fs = __webpack_require__(3);
 var _0777 = parseInt('0777', 8);
 

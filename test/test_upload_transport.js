@@ -14,7 +14,7 @@ const _transport = new MultiTransport(
         uuid: 'test_uuid',
         bucketName: 'bce-bos-client',
         objectKey: '100m',
-        localPath: '/Users/mudio/Desktop/tmp/100m',
+        localPath: '/Users/mudio/Desktop/a',
     },
 );
 

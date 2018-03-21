@@ -12,7 +12,7 @@ import {MimeType} from 'bce-sdk-js';
 import {CONTENT_LENGTH, CONTENT_TYPE} from 'bce-sdk-js/src/headers';
 
 import Transport from './transport';
-import {TransportOrigin, Meta} from '../headers';
+import {TransportOrigin, Meta, TransportStatus} from '../headers';
 
 export default class SingleTransport extends Transport {
     constructor(...args) {
@@ -72,21 +72,6 @@ export default class SingleTransport extends Transport {
     }
 
     /**
-     * 暂停下载，必须使用`resume`恢复
-     *
-     * @memberof Transport
-     */
-    pause() {
-        this._paused = true;
-
-        if (this._stream) {
-            this._stream.emit('abort');
-        } else {
-            this.emit('pause', {uuid: this._uuid});
-        }
-    }
-
-    /**
      * 恢复暂停后的下载任务
      *
      * @memberof Transport
@@ -95,7 +80,7 @@ export default class SingleTransport extends Transport {
         /**
          * 重置状态
          */
-        this._paused = false;
+        this._state = TransportStatus.Running;
 
         /**
          * 文件不存在还玩个蛋

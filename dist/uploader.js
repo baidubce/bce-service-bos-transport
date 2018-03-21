@@ -1656,7 +1656,7 @@ var u = __webpack_require__(1);
 var config = __webpack_require__(51);
 var Auth = __webpack_require__(11);
 var HttpClient = __webpack_require__(8);
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 
 /**
  * BceBaseClient
@@ -3849,12 +3849,6 @@ if (typeof process !== 'undefined' && process.type === 'renderer') {
 /* 6 */
 /***/ (function(module, exports) {
 
-module.exports = require("path");
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
 /**
  * Copyright (c) 2014 Baidu.com, Inc. All Rights Reserved
  *
@@ -3920,6 +3914,12 @@ exports.ACCEPT = 'accept';
 
 
 /***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3953,7 +3953,7 @@ var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 var debug = __webpack_require__(5)('bce-sdk:HttpClient');
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 
 /**
  * The HttpClient
@@ -4683,7 +4683,7 @@ var u = __webpack_require__(1);
 
 var debug = __webpack_require__(5)('bce-sdk:auth');
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 var strings = __webpack_require__(26);
 
 /**
@@ -4874,14 +4874,14 @@ module.exports = require("crypto");
 /* eslint max-params:[0,10] */
 
 var util = __webpack_require__(0);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var fs = __webpack_require__(3);
 var qs = __webpack_require__(17);
 
 var u = __webpack_require__(1);
 var Q = __webpack_require__(4);
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 var strings = __webpack_require__(26);
 var Auth = __webpack_require__(11);
 var crypto = __webpack_require__(10);
@@ -6838,6 +6838,32 @@ exports.guess = function (ext) {
 
 /***/ }),
 /* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * azeroth - 日志记录器
+ *
+ * @file logger.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+function logger(type, message, ...args) {
+  process.send({ category: 'log', message: { type, message, pid: process.pid } }, ...args);
+}
+
+const info = exports.info = (msg, ...args) => logger('info', msg, ...args);
+const warn = exports.warn = (msg, ...args) => logger('warn', msg, ...args);
+const debug = exports.debug = (msg, ...args) => logger('debug', msg, ...args);
+const error = exports.error = (msg, ...args) => logger('error', msg, ...args);
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports) {
 
 /**
@@ -6918,7 +6944,7 @@ module.exports = isFunction;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6931,7 +6957,7 @@ exports.hasNextTick = exports.hasSetImmediate = undefined;
 exports.fallback = fallback;
 exports.wrap = wrap;
 
-var _slice = __webpack_require__(21);
+var _slice = __webpack_require__(22);
 
 var _slice2 = _interopRequireDefault(_slice);
 
@@ -6966,7 +6992,7 @@ if (hasSetImmediate) {
 exports.default = wrap(_defer);
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6988,7 +7014,7 @@ function slice(arrayLike, start) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7017,32 +7043,6 @@ function wrapAsync(asyncFn) {
 
 exports.default = wrapAsync;
 exports.isAsync = isAsync;
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * azeroth - 日志记录器
- *
- * @file logger.js
- * @author mudio(job.zhanghao@gmail.com)
- */
-
-function logger(type, message) {
-  process.send({ category: 'log', message: { type, message } });
-}
-
-const debug = exports.debug = msg => logger('debug', msg);
-const info = exports.info = msg => logger('info', msg);
-const warn = exports.warn = msg => logger('warn', msg);
-const error = exports.error = msg => logger('error', msg);
 
 /***/ }),
 /* 24 */
@@ -7433,6 +7433,38 @@ module.exports = Statistic;
 
 
 Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+/**
+ * Headers
+ *
+ * @file src/headers.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+const Meta = exports.Meta = {
+    xMetaOrigin: 'x-bce-meta-origin',
+    xMetaMD5: 'x-bce-meta-md5'
+};
+
+const TransportOrigin = exports.TransportOrigin = 'bce-client';
+
+const TransportStatus = exports.TransportStatus = {
+    UnStarted: 'UnStarted',
+    Running: 'Running',
+    Paused: 'Paused',
+    Finished: 'Finished',
+    Error: 'Error'
+};
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
@@ -7447,7 +7479,7 @@ var _queue = __webpack_require__(31);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _wrapAsync = __webpack_require__(22);
+var _wrapAsync = __webpack_require__(23);
 
 var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
@@ -7562,7 +7594,7 @@ module.exports = exports['default'];
  */
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports) {
 
 /**
@@ -7945,30 +7977,6 @@ module.exports = debounce;
 
 
 /***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * Headers
- *
- * @file src/headers.js
- * @author mudio(job.zhanghao@gmail.com)
- */
-
-const Meta = exports.Meta = {
-  xMetaOrigin: 'x-bce-meta-origin',
-  xMetaMD5: 'x-bce-meta-md5'
-};
-
-const TransportOrigin = exports.TransportOrigin = 'bce-client';
-
-/***/ }),
 /* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -7996,7 +8004,7 @@ var _onlyOnce = __webpack_require__(38);
 
 var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
 
-var _setImmediate = __webpack_require__(20);
+var _setImmediate = __webpack_require__(21);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
@@ -8004,7 +8012,7 @@ var _DoublyLinkedList = __webpack_require__(39);
 
 var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
 
-var _wrapAsync = __webpack_require__(22);
+var _wrapAsync = __webpack_require__(23);
 
 var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
@@ -8461,7 +8469,7 @@ var _initialParams = __webpack_require__(42);
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
-var _setImmediate = __webpack_require__(20);
+var _setImmediate = __webpack_require__(21);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
@@ -8613,7 +8621,7 @@ exports.default = function (fn) {
     };
 };
 
-var _slice = __webpack_require__(21);
+var _slice = __webpack_require__(22);
 
 var _slice2 = _interopRequireDefault(_slice);
 
@@ -9455,12 +9463,12 @@ module.exports = Multipart;
 
 var crypto = __webpack_require__(15);
 var util = __webpack_require__(0);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var fs = __webpack_require__(3);
 
 var u = __webpack_require__(1);
 
-var H = __webpack_require__(7);
+var H = __webpack_require__(6);
 var HttpClient = __webpack_require__(8);
 var BceBaseClient = __webpack_require__(2);
 var MimeType = __webpack_require__(18);
@@ -10034,7 +10042,7 @@ module.exports = BccClient;
 /* eslint-env node */
 /* eslint max-params:[0,10] */
 var fs = __webpack_require__(3);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var util = __webpack_require__(0);
 
 var BceBaseClient = __webpack_require__(2);
@@ -14007,7 +14015,7 @@ module.exports = StrategyGroup;
 /* eslint fecs-camelcase:[2,{"ignore":["/opt_/"]}] */
 
 var fs = __webpack_require__(3);
-var path = __webpack_require__(6);
+var path = __webpack_require__(7);
 var util = __webpack_require__(0);
 var builtinUrl = __webpack_require__(12);
 
@@ -14890,7 +14898,9 @@ var _crypto2 = _interopRequireDefault(_crypto);
 
 __webpack_require__(83);
 
-var _headers = __webpack_require__(30);
+var _logger = __webpack_require__(19);
+
+var _headers = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14914,7 +14924,7 @@ class Transport extends _events.EventEmitter {
         this._bucketName = bucketName;
         this._client = new _bceSdkJs.BosClient(credentials);
 
-        this._paused = true;
+        this._state = _headers.TransportStatus.UnStarted;
     }
 
     /**
@@ -14967,12 +14977,7 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     _checkFinish() {
-        if (this._paused) {
-            return this.emit('pause', { uuid: this._uuid });
-        }
-
-        this._paused = true;
-
+        this._state = _headers.TransportStatus.Finished;
         this.emit('finish', { uuid: this._uuid, localPath: this._localPath });
     }
 
@@ -14984,12 +14989,12 @@ class Transport extends _events.EventEmitter {
      * @memberof Transport
      */
     _checkError(err) {
-        if (this._paused) {
-            return this.emit('pause', { uuid: this._uuid });
+        if (this._state === _headers.TransportStatus.Paused) {
+            return;
         }
 
-        this._paused = true;
-
+        this._state = _headers.TransportStatus.Error;
+        (0, _logger.error)(err);
         if (typeof err === 'string') {
             this.emit('error', { uuid: this._uuid, error: err });
         } else if (err instanceof Error || typeof err.message === 'string') {
@@ -15087,8 +15092,27 @@ class Transport extends _events.EventEmitter {
         });
     }
 
-    isPaused() {
-        return this._paused;
+    /**
+     * 暂停上传
+     *
+     * @memberof Transport
+     */
+    pause() {
+        this._state = _headers.TransportStatus.Paused;
+
+        if (this._stream) {
+            this._stream.emit('abort');
+        } else {
+            this.emit('pause', { uuid: this._uuid });
+        }
+    }
+
+    isRunning() {
+        return this._state === _headers.TransportStatus.Running;
+    }
+
+    isUnStarted() {
+        return this._state === _headers.TransportStatus.UnStarted;
     }
 }
 exports.default = Transport;
@@ -15104,7 +15128,7 @@ exports.default = Transport;
 "use strict";
 
 
-var _lodash = __webpack_require__(19);
+var _lodash = __webpack_require__(20);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -15112,7 +15136,7 @@ var _dispatcher2 = __webpack_require__(81);
 
 var _dispatcher3 = _interopRequireDefault(_dispatcher2);
 
-var _logger = __webpack_require__(23);
+var _logger = __webpack_require__(19);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15131,8 +15155,7 @@ if (!(0, _lodash2.default)(process.send)) {
 const { BCE_AK, BCE_SK } = process.env;
 
 if (!BCE_AK || !BCE_SK) {
-    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK` env.');
-    process.exit();
+    (0, _logger.error)('Not found `BCE_AK`,`BCE_SK` env.', () => process.exit());
 }
 
 const _dispatcher = new _dispatcher3.default({
@@ -15140,6 +15163,8 @@ const _dispatcher = new _dispatcher3.default({
 });
 
 process.on('message', msg => _dispatcher.dispatch(msg));
+process.on('unhandledRejection', err => (0, _logger.error)(`UnhandledRejection => ${err.message} \n ${err.stack}`));
+process.on('uncaughtException', err => (0, _logger.error)(`UncaughtException => ${err}`, () => process.exit()));
 
 /***/ }),
 /* 81 */
@@ -15156,15 +15181,15 @@ var _fs = __webpack_require__(3);
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _queue = __webpack_require__(28);
+var _queue = __webpack_require__(29);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _lodash = __webpack_require__(19);
+var _lodash = __webpack_require__(20);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _logger = __webpack_require__(23);
+var _logger = __webpack_require__(19);
 
 var _single_transport = __webpack_require__(82);
 
@@ -15218,6 +15243,10 @@ class Dispatcher {
     }
 
     _invoke(transport, done) {
+        if (!transport.isUnStarted()) {
+            transport.removeAllListeners();
+        }
+
         transport.on('start', msg => this._send(_command.NotifyStart, msg));
 
         transport.on('pause', msg => {
@@ -15285,11 +15314,21 @@ class Dispatcher {
     }
 
     resumeItem({ uuid }) {
-        if (uuid in this._transportCache) {
-            if (this._transportCache[uuid].isPaused()) {
-                this._queue.unshift(this._transportCache[uuid]);
-            }
+        if (!this._transportCache[uuid].isRunning()) {
+            return this._queue.unshift(this._transportCache[uuid]);
         }
+
+        (0, _logger.error)(`Task has running => ${uuid}`);
+    }
+
+    removeItem({ uuid }) {
+        const task = this._transportCache[uuid];
+
+        if (task && task.isRunning()) {
+            task.pause();
+        }
+
+        delete this._transportCache[uuid];
     }
 }
 exports.default = Dispatcher; /**
@@ -15314,23 +15353,23 @@ var _fs = __webpack_require__(3);
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _path = __webpack_require__(6);
+var _path = __webpack_require__(7);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _lodash = __webpack_require__(29);
+var _lodash = __webpack_require__(30);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
 var _bceSdkJs = __webpack_require__(24);
 
-var _headers = __webpack_require__(7);
+var _headers = __webpack_require__(6);
 
 var _transport = __webpack_require__(75);
 
 var _transport2 = _interopRequireDefault(_transport);
 
-var _headers2 = __webpack_require__(30);
+var _headers2 = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15405,21 +15444,6 @@ class SingleTransport extends _transport2.default {
     }
 
     /**
-     * 暂停下载，必须使用`resume`恢复
-     *
-     * @memberof Transport
-     */
-    pause() {
-        this._paused = true;
-
-        if (this._stream) {
-            this._stream.emit('abort');
-        } else {
-            this.emit('pause', { uuid: this._uuid });
-        }
-    }
-
-    /**
      * 恢复暂停后的下载任务
      *
      * @memberof Transport
@@ -15431,7 +15455,7 @@ class SingleTransport extends _transport2.default {
             /**
              * 重置状态
              */
-            _this2._paused = false;
+            _this2._state = _headers2.TransportStatus.Running;
 
             /**
              * 文件不存在还玩个蛋
@@ -15546,19 +15570,21 @@ var _fs = __webpack_require__(3);
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _queue = __webpack_require__(28);
+var _queue = __webpack_require__(29);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _lodash = __webpack_require__(29);
+var _lodash = __webpack_require__(30);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _headers = __webpack_require__(7);
+var _headers = __webpack_require__(6);
 
 var _transport = __webpack_require__(75);
 
 var _transport2 = _interopRequireDefault(_transport);
+
+var _headers2 = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15661,21 +15687,6 @@ class MultiTransport extends _transport2.default {
     }
 
     /**
-     * 暂停下载，必须使用`resume`恢复
-     *
-     * @memberof MultiTransport
-     */
-    pause() {
-        this._paused = true;
-
-        if (this._stream) {
-            this._stream.emit('abort');
-        } else {
-            this.emit('pause', { uuid: this._uuid });
-        }
-    }
-
-    /**
      * 恢复暂停后的下载任务
      *
      * @memberof MultiTransport
@@ -15687,7 +15698,7 @@ class MultiTransport extends _transport2.default {
             /**
              * 重置状态
              */
-            _this._paused = false;
+            _this._state = _headers2.TransportStatus.Running;
 
             /**
              * 文件不存在还玩个蛋

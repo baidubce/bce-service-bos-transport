@@ -20,8 +20,7 @@ if (!isFunction(process.send)) {
 const {BCE_AK, BCE_SK} = process.env;
 
 if (!BCE_AK || !BCE_SK) {
-    error('Not found `BCE_AK`,`BCE_SK` env.');
-    process.exit();
+    error('Not found `BCE_AK`,`BCE_SK` env.', () => process.exit());
 }
 
 const _dispatcher = new Dispatcher({
@@ -29,3 +28,9 @@ const _dispatcher = new Dispatcher({
 });
 
 process.on('message', msg => _dispatcher.dispatch(msg));
+process.on('unhandledRejection',
+    err => error(`UnhandledRejection => ${err.message} \n ${err.stack}`),
+);
+process.on('uncaughtException',
+    err => error(`UncaughtException => ${err}`, () => process.exit()),
+);

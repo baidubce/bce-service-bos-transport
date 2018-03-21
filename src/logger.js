@@ -5,12 +5,12 @@
  * @author mudio(job.zhanghao@gmail.com)
  */
 
-function logger(type, message) {
-    process.send({category: 'log', message: {type, message}});
+function logger(type, message, ...args) {
+    process.send({category: 'log', message: {type, message, pid: process.pid}}, ...args);
 }
 
-export const debug = msg => logger('debug', msg);
-export const info = msg => logger('info', msg);
-export const warn = msg => logger('warn', msg);
-export const error = msg => logger('error', msg);
+export const info = (msg, ...args) => logger('info', msg, ...args);
+export const warn = (msg, ...args) => logger('warn', msg, ...args);
+export const debug = (msg, ...args) => logger('debug', msg, ...args);
+export const error = (msg, ...args) => logger('error', msg, ...args);
 

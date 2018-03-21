@@ -9,7 +9,7 @@ import fs from 'fs';
 import queue from 'async/queue';
 import isFunction from 'lodash.isfunction';
 
-import {debug} from '../logger';
+import {debug, error} from '../logger';
 import SingleTransport from './single_transport';
 import MultiTransport from './multi_transport';
 
@@ -58,6 +58,10 @@ export default class Dispatcher {
     }
 
     _invoke(transport, done) {
+        if (!transport.isUnStarted()) {
+            transport.removeAllListeners();
+        }
+
         transport.on('start', msg => this._send(NotifyStart, msg));
 
         transport.on('pause', (msg) => {
@@ -128,10 +132,20 @@ export default class Dispatcher {
     }
 
     resumeItem({uuid}) {
-        if (uuid in this._transportCache) {
-            if (this._transportCache[uuid].isPaused()) {
-                this._queue.unshift(this._transportCache[uuid]);
-            }
+        if (!this._transportCache[uuid].isRunning()) {
+            return this._queue.unshift(this._transportCache[uuid]);
         }
+
+        error(`Task has running => ${uuid}`);
+    }
+
+    removeItem({uuid}) {
+        const task = this._transportCache[uuid];
+
+        if (task && task.isRunning()) {
+            task.pause();
+        }
+
+        delete this._transportCache[uuid];
     }
 }

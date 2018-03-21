@@ -5,11 +5,10 @@
  * @author mudio(job.zhanghao@gmail.com)
  */
 
-import path from 'path';
 import queue from 'async/queue';
 import isFunction from 'lodash.isfunction';
 
-import {debug} from '../logger';
+import {debug, error} from '../logger';
 import Transport from './transport';
 import {
     NotifyStart, NotifyPaused,
@@ -25,18 +24,24 @@ export default class Dispatcher {
     }
 
     _invoke(transport, done) {
+        if (!transport.isUnStarted()) {
+            transport.removeAllListeners();
+        }
+
         transport.on('rate', msg => this._send(NotifyProgress, msg));
 
         transport.on('pause', (msg) => {
             this._send(NotifyPaused, msg);
             done();
         });
+
         transport.on('finish', (msg) => {
             this._send(NotifyFinished, msg);
             // 如果已经完成的任务，则清理掉资源
             delete this._transportCache[msg.uuid];
             done();
         });
+
         transport.on('error', (msg) => {
             this._send(NotifyError, msg);
             done();
@@ -63,7 +68,6 @@ export default class Dispatcher {
 
     addItem(config = {}, endpoint) {
         const uuid = config.uuid;
-
         if (uuid) {
             if (!this._transportCache[uuid]) {
                 this._transportCache[uuid] = new Transport(
@@ -76,16 +80,6 @@ export default class Dispatcher {
         }
     }
 
-    addPatch({uuid, bucketName, prefix, objectKeys = [], localPath, totalSize}) {
-        objectKeys.forEach(item => this.addItem({
-            uuid,
-            bucketName,
-            totalSize,
-            objectKey: path.posix.join(prefix, item),
-            localPath: path.join(localPath, item),
-        }));
-    }
-
     pauseItem({uuid}) {
         if (uuid in this._transportCache) {
             this._transportCache[uuid].pause();
@@ -94,18 +88,21 @@ export default class Dispatcher {
         }
     }
 
-    pauseAll() {
-        this._queue.remove((item) => {
-            item.data.pause();
-            return true;
-        });
+    resumeItem({uuid}) {
+        if (!this._transportCache[uuid].isRunning()) {
+            return this._queue.unshift(this._transportCache[uuid]);
+        }
+
+        error(`Task has running => ${uuid}`);
     }
 
-    resumeItem({uuid}) {
-        if (uuid in this._transportCache) {
-            if (this._transportCache[uuid].isPaused()) {
-                this._queue.unshift(this._transportCache[uuid]);
-            }
+    removeItem({uuid}) {
+        const task = this._transportCache[uuid];
+
+        if (task && task.isRunning()) {
+            task.pause();
         }
+
+        delete this._transportCache[uuid];
     }
 }

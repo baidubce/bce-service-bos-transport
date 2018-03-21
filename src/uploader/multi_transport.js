@@ -11,6 +11,7 @@ import debounce from 'lodash.debounce';
 import {CONTENT_LENGTH, CONTENT_TYPE} from 'bce-sdk-js/src/headers';
 
 import Transport from './transport';
+import {TransportStatus} from '../headers';
 
 const kPartSize = 20 * 1024 * 1024;
 
@@ -108,21 +109,6 @@ export default class MultiTransport extends Transport {
     }
 
     /**
-     * 暂停下载，必须使用`resume`恢复
-     *
-     * @memberof MultiTransport
-     */
-    pause() {
-        this._paused = true;
-
-        if (this._stream) {
-            this._stream.emit('abort');
-        } else {
-            this.emit('pause', {uuid: this._uuid});
-        }
-    }
-
-    /**
      * 恢复暂停后的下载任务
      *
      * @memberof MultiTransport
@@ -131,7 +117,7 @@ export default class MultiTransport extends Transport {
         /**
          * 重置状态
          */
-        this._paused = false;
+        this._state = TransportStatus.Running;
 
         /**
          * 文件不存在还玩个蛋

@@ -14,7 +14,7 @@ import {BosClient} from 'bce-sdk-js';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 
-import {Meta} from '../headers';
+import {Meta, TransportStatus} from '../headers';
 
 export default class Transport extends EventEmitter {
     constructor(credentials, config) {
@@ -28,8 +28,7 @@ export default class Transport extends EventEmitter {
         this._bucketName = bucketName;
         this._client = new BosClient(credentials);
 
-        this._timeout = 10e3; // 10s
-        this._paused = true;
+        this._state = TransportStatus.UnStarted;
     }
 
     /**
@@ -58,11 +57,11 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     _checkFinish() {
-        if (this._paused) {
-            return this.emit('pause', {uuid: this._uuid});
+        if (!this.isRunning()) {
+            return;
         }
 
-        this._paused = true;
+        this._state = TransportStatus.Finished;
 
         this.emit('finish', {uuid: this._uuid, objectKey: this._objectKey});
     }
@@ -75,11 +74,11 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     _checkError(err) {
-        if (this._paused) {
-            return this.emit('pause', {uuid: this._uuid});
+        if (!this.isRunning()) {
+            return;
         }
 
-        this._paused = true;
+        this._state = TransportStatus.Error;
 
         if (typeof err === 'string') {
             this.emit('error', {uuid: this._uuid, error: err});
@@ -93,11 +92,16 @@ export default class Transport extends EventEmitter {
     }
 
     _onTimeout() {
-        if (this._outputStream) {
-            this._outputStream.emit('error', new Error('网络连接超时'));
+        if (this._outputStream && this.isRunning()) {
+            this._checkError(new Error('网络连接超时'));
             this._outputStream.end();
         }
     }
+
+    /**
+     * 保证`WriteStream`一定可以被close掉
+     */
+    _checkAlive = debounce(() => this._onTimeout(), 10e3);
 
     /**
      * 重新下载文件
@@ -110,11 +114,6 @@ export default class Transport extends EventEmitter {
          */
         this._outputStream = fs.createWriteStream(this._localPath, {flags: begin ? 'a' : 'w'});
         const outputStream = this._outputStream;
-
-        /**
-         * 保证`WriteStream`一定可以被close掉
-         */
-        const _checkAlive = debounce(() => this._onTimeout(), this._timeout);
 
         /**
          * 通知节流
@@ -139,7 +138,7 @@ export default class Transport extends EventEmitter {
 
             _notifyProgress(rate, outputStream.bytesWritten + begin);
 
-            _checkAlive();
+            this._checkAlive();
         });
 
         /**
@@ -173,7 +172,7 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     pause() {
-        this._paused = true;
+        this._state = TransportStatus.Paused;
 
         if (this._outputStream) {
             this._outputStream.end();
@@ -191,7 +190,7 @@ export default class Transport extends EventEmitter {
         /**
          * 重置状态
          */
-        this._paused = false;
+        this._state = TransportStatus.Running;
 
         /**
          * 文件不存在则重新开始
@@ -217,8 +216,7 @@ export default class Transport extends EventEmitter {
         this._fetchMetadata().then(
             (res) => {
                 const {xMetaSize, xMetaModifiedTime} = res;
-
-                if (size > xMetaSize || mtime.getTime() >= xMetaModifiedTime) {
+                if (size >= xMetaSize || mtime.getTime() <= xMetaModifiedTime) {
                     /**
                      * 文件不一致，重新下载
                      */
@@ -239,7 +237,11 @@ export default class Transport extends EventEmitter {
         );
     }
 
-    isPaused() {
-        return this._paused;
+    isRunning() {
+        return this._state === TransportStatus.Running;
+    }
+
+    isUnStarted() {
+        return this._state === TransportStatus.UnStarted;
     }
 }

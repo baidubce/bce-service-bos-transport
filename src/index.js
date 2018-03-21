@@ -5,8 +5,5 @@
  * @author mudio(job.zhanghao@gmail.com)
  */
 
-import * as uploadCmd from './uploader/command';
-import * as downloadCmd from './downloader/command';
-
-export const UploadCommand = uploadCmd;
-export const DownloadCommand = downloadCmd;
+export {default as UploadCommand} from './uploader/command';
+export {default as DownloadCommand} from './downloader/command';

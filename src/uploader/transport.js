@@ -11,7 +11,8 @@ import {BosClient} from 'bce-sdk-js';
 import crypto from 'bce-sdk-js/src/crypto';
 
 import '../fake_client';
-import {TransportOrigin, Meta} from '../headers';
+import {error} from '../logger';
+import {TransportOrigin, Meta, TransportStatus} from '../headers';
 
 export default class Transport extends EventEmitter {
     constructor(credentials, config) {
@@ -26,7 +27,7 @@ export default class Transport extends EventEmitter {
         this._bucketName = bucketName;
         this._client = new BosClient(credentials);
 
-        this._paused = true;
+        this._state = TransportStatus.UnStarted;
     }
 
     /**
@@ -78,12 +79,7 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     _checkFinish() {
-        if (this._paused) {
-            return this.emit('pause', {uuid: this._uuid});
-        }
-
-        this._paused = true;
-
+        this._state = TransportStatus.Finished;
         this.emit('finish', {uuid: this._uuid, localPath: this._localPath});
     }
 
@@ -95,12 +91,12 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     _checkError(err) {
-        if (this._paused) {
-            return this.emit('pause', {uuid: this._uuid});
+        if (this._state === TransportStatus.Paused) {
+            return;
         }
 
-        this._paused = true;
-
+        this._state = TransportStatus.Error;
+        error(err);
         if (typeof err === 'string') {
             this.emit('error', {uuid: this._uuid, error: err});
         } else if (err instanceof Error || typeof err.message === 'string') {
@@ -190,7 +186,26 @@ export default class Transport extends EventEmitter {
         });
     }
 
-    isPaused() {
-        return this._paused;
+    /**
+     * 暂停上传
+     *
+     * @memberof Transport
+     */
+    pause() {
+        this._state = TransportStatus.Paused;
+
+        if (this._stream) {
+            this._stream.emit('abort');
+        } else {
+            this.emit('pause', {uuid: this._uuid});
+        }
+    }
+
+    isRunning() {
+        return this._state === TransportStatus.Running;
+    }
+
+    isUnStarted() {
+        return this._state === TransportStatus.UnStarted;
     }
 }

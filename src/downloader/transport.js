@@ -83,7 +83,7 @@ export default class Transport extends EventEmitter {
         if (typeof err === 'string') {
             this.emit('error', {uuid: this._uuid, error: err});
         } else if (err instanceof Error || typeof err.message === 'string') {
-            this.emit('error', {uuid: this._uuid, error: err.message});
+            this.emit('error', {uuid: this._uuid, error: err.message + err.stack});
         } else if ('status_code' in err) {
             this.emit('error', {uuid: this._uuid, error: `Server code = ${err.status_code}`});
         } else {

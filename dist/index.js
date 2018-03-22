@@ -123,26 +123,27 @@ const NotifyProgress = exports.NotifyProgress = 'upload_notify_progress';
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.DownloadCommand = exports.UploadCommand = undefined;
 
 var _command = __webpack_require__(74);
 
-Object.defineProperty(exports, 'UploadCommand', {
-  enumerable: true,
-  get: function () {
-    return _interopRequireDefault(_command).default;
-  }
-});
+var uploadCmd = _interopRequireWildcard(_command);
 
 var _command2 = __webpack_require__(73);
 
-Object.defineProperty(exports, 'DownloadCommand', {
-  enumerable: true,
-  get: function () {
-    return _interopRequireDefault(_command2).default;
-  }
-});
+var downloadCmd = _interopRequireWildcard(_command2);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+/**
+ * 入口程序
+ *
+ * @file src/index.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+const UploadCommand = exports.UploadCommand = uploadCmd;
+const DownloadCommand = exports.DownloadCommand = downloadCmd;
 
 /***/ })
 

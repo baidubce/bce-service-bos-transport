@@ -11,7 +11,6 @@ import {BosClient} from 'bce-sdk-js';
 import crypto from 'bce-sdk-js/src/crypto';
 
 import '../fake_client';
-import {error} from '../logger';
 import {TransportOrigin, Meta, TransportStatus} from '../headers';
 
 export default class Transport extends EventEmitter {
@@ -79,7 +78,12 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     _checkFinish() {
+        if (!this.isRunning()) {
+            return;
+        }
+
         this._state = TransportStatus.Finished;
+
         this.emit('finish', {uuid: this._uuid, localPath: this._localPath});
     }
 
@@ -91,12 +95,12 @@ export default class Transport extends EventEmitter {
      * @memberof Transport
      */
     _checkError(err) {
-        if (this._state === TransportStatus.Paused) {
+        if (!this.isRunning()) {
             return;
         }
 
         this._state = TransportStatus.Error;
-        error(err);
+
         if (typeof err === 'string') {
             this.emit('error', {uuid: this._uuid, error: err});
         } else if (err instanceof Error || typeof err.message === 'string') {

@@ -6838,32 +6838,6 @@ exports.guess = function (ext) {
 
 /***/ }),
 /* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * azeroth - 日志记录器
- *
- * @file logger.js
- * @author mudio(job.zhanghao@gmail.com)
- */
-
-function logger(type, message, ...args) {
-  process.send({ category: 'log', message: { type, message, pid: process.pid } }, ...args);
-}
-
-const info = exports.info = (msg, ...args) => logger('info', msg, ...args);
-const warn = exports.warn = (msg, ...args) => logger('warn', msg, ...args);
-const debug = exports.debug = (msg, ...args) => logger('debug', msg, ...args);
-const error = exports.error = (msg, ...args) => logger('error', msg, ...args);
-
-/***/ }),
-/* 20 */
 /***/ (function(module, exports) {
 
 /**
@@ -6944,7 +6918,7 @@ module.exports = isFunction;
 
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6957,7 +6931,7 @@ exports.hasNextTick = exports.hasSetImmediate = undefined;
 exports.fallback = fallback;
 exports.wrap = wrap;
 
-var _slice = __webpack_require__(22);
+var _slice = __webpack_require__(21);
 
 var _slice2 = _interopRequireDefault(_slice);
 
@@ -6992,7 +6966,7 @@ if (hasSetImmediate) {
 exports.default = wrap(_defer);
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7014,7 +6988,7 @@ function slice(arrayLike, start) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7043,6 +7017,32 @@ function wrapAsync(asyncFn) {
 
 exports.default = wrapAsync;
 exports.isAsync = isAsync;
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * azeroth - 日志记录器
+ *
+ * @file logger.js
+ * @author mudio(job.zhanghao@gmail.com)
+ */
+
+function logger(type, message, ...args) {
+  process.send({ category: 'log', message: { type, message, pid: process.pid } }, ...args);
+}
+
+const info = exports.info = (msg, ...args) => logger('info', msg, ...args);
+const warn = exports.warn = (msg, ...args) => logger('warn', msg, ...args);
+const debug = exports.debug = (msg, ...args) => logger('debug', msg, ...args);
+const error = exports.error = (msg, ...args) => logger('error', msg, ...args);
 
 /***/ }),
 /* 24 */
@@ -7479,7 +7479,7 @@ var _queue = __webpack_require__(31);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _wrapAsync = __webpack_require__(23);
+var _wrapAsync = __webpack_require__(22);
 
 var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
@@ -8004,7 +8004,7 @@ var _onlyOnce = __webpack_require__(38);
 
 var _onlyOnce2 = _interopRequireDefault(_onlyOnce);
 
-var _setImmediate = __webpack_require__(21);
+var _setImmediate = __webpack_require__(20);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
@@ -8012,7 +8012,7 @@ var _DoublyLinkedList = __webpack_require__(39);
 
 var _DoublyLinkedList2 = _interopRequireDefault(_DoublyLinkedList);
 
-var _wrapAsync = __webpack_require__(23);
+var _wrapAsync = __webpack_require__(22);
 
 var _wrapAsync2 = _interopRequireDefault(_wrapAsync);
 
@@ -8469,7 +8469,7 @@ var _initialParams = __webpack_require__(42);
 
 var _initialParams2 = _interopRequireDefault(_initialParams);
 
-var _setImmediate = __webpack_require__(21);
+var _setImmediate = __webpack_require__(20);
 
 var _setImmediate2 = _interopRequireDefault(_setImmediate);
 
@@ -8621,7 +8621,7 @@ exports.default = function (fn) {
     };
 };
 
-var _slice = __webpack_require__(22);
+var _slice = __webpack_require__(21);
 
 var _slice2 = _interopRequireDefault(_slice);
 
@@ -14881,7 +14881,7 @@ const NotifyStart = exports.NotifyStart = 'download_notify_start';
 "use strict";
 
 
-var _lodash = __webpack_require__(20);
+var _lodash = __webpack_require__(19);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -14889,7 +14889,7 @@ var _dispatcher2 = __webpack_require__(77);
 
 var _dispatcher3 = _interopRequireDefault(_dispatcher2);
 
-var _logger = __webpack_require__(19);
+var _logger = __webpack_require__(23);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14934,11 +14934,11 @@ var _queue = __webpack_require__(29);
 
 var _queue2 = _interopRequireDefault(_queue);
 
-var _lodash = __webpack_require__(20);
+var _lodash = __webpack_require__(19);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _logger = __webpack_require__(19);
+var _logger = __webpack_require__(23);
 
 var _transport = __webpack_require__(78);
 

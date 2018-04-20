@@ -15241,9 +15241,9 @@ class Transport extends _events.EventEmitter {
 
         if (this._outputStream) {
             this._outputStream.end();
-        } else {
-            this.emit('pause', { uuid: this._uuid });
         }
+
+        this.emit('pause', { uuid: this._uuid });
     }
 
     /**
